@@ -6,7 +6,7 @@ services:
     runtime: node
     region: singapore
     plan: free # switch to starter before real users
-    buildCommand: npm ci && npm run build
+    buildCommand: npm install && npm run build
     # Runs pending DB migrations on every start (works on the free plan). Move it to preDeployCommand on paid plans.
     startCommand: npx prisma migrate deploy && npm start
     healthCheckPath: /welcome
