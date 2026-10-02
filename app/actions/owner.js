@@ -42,7 +42,7 @@ export async function saveProperty(id, data, publish) {
     if (!title) return { error: "Add a property title.", step: 1 };
     if (!city || !locality) return { error: "City and locality are required.", step: 1 };
     if (!price) return { error: "Enter the price.", step: 3 };
-    if (images.length < 4) return { error: "Add at least 4 photos.", step: 3 };
+    if (images.length < 2) return { error: "Add at least 2 photos.", step: 3 };
     if (!data.confirmed) return { error: "Please confirm the details are correct.", step: 3 };
   } else if (!title) {
     return { error: "Add a title before saving a draft.", step: 1 };

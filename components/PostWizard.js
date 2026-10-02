@@ -119,7 +119,7 @@ export default function PostWizard({ initial, id: initialId }) {
     }
     if (n === 3) {
       if (!d.price || Number(d.price) <= 0) return "Enter the price.";
-      if (images.length < 4) return "Add at least 4 photos.";
+      if (images.length < 2) return "Add at least 2 photos.";
       if (!d.confirmed) return "Please confirm the details are correct.";
     }
     return "";
@@ -375,7 +375,7 @@ export default function PostWizard({ initial, id: initialId }) {
             <Card className="space-y-3">
               <div className="flex items-center justify-between">
                 <h2 className="text-[14px] font-extrabold">Photos & video</h2>
-                <span className="text-[11px] font-bold text-mute">{images.length}/{MAX_PHOTOS} photos · min 4</span>
+                <span className="text-[11px] font-bold text-mute">{images.length}/{MAX_PHOTOS} photos · min 2</span>
               </div>
               <div className="grid grid-cols-3 gap-2">
                 {images.map((m, i) => (
