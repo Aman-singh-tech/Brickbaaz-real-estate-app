@@ -1,0 +1,208 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------- Brickbaaz ----------
+
+enum Role {
+  BUYER
+  OWNER
+}
+
+enum Purpose {
+  SALE
+  RENT
+}
+
+enum PropertyType {
+  APARTMENT
+  VILLA
+  BUILDER_FLOOR
+  PLOT
+  COMMERCIAL
+}
+
+enum PropertyStatus {
+  DRAFT
+  ACTIVE
+  PAUSED
+  RENTED
+  SOLD
+}
+
+enum MediaKind {
+  IMAGE
+  VIDEO
+}
+
+enum InquiryKind {
+  VISIT
+  CALLBACK
+  MESSAGE
+}
+
+enum Sender {
+  BUYER
+  OWNER
+}
+
+model User {
+  id            Int            @id @default(autoincrement())
+  phone         String?        @unique
+  email         String?        @unique
+  passwordHash  String?
+  googleId      String?        @unique
+  emailVerified Boolean        @default(false)
+  name          String?
+  role          Role           @default(BUYER)
+  createdAt     DateTime       @default(now())
+  properties    Property[]
+  inquiries     Inquiry[]
+  saved         Saved[]
+  notifications Notification[]
+  tokens        EmailToken[]
+}
+
+enum TokenKind {
+  VERIFY
+  RESET
+}
+
+model EmailToken {
+  id        Int       @id @default(autoincrement())
+  userId    Int
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  kind      TokenKind
+  hash      String    @unique
+  expiresAt DateTime
+  createdAt DateTime  @default(now())
+
+  @@index([userId, kind])
+}
+
+// Kept for a future phone-OTP login (see lib/otp.js).
+model Otp {
+  id        Int      @id @default(autoincrement())
+  phone     String
+  codeHash  String
+  expiresAt DateTime
+  attempts  Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@index([phone])
+}
+
+model Property {
+  id            Int            @id @default(autoincrement())
+  ownerId       Int
+  owner         User           @relation(fields: [ownerId], references: [id])
+  status        PropertyStatus @default(DRAFT)
+  purpose       Purpose
+  type          PropertyType
+  title         String
+  city          String
+  state         String?
+  locality      String
+  society       String?
+  lat           Float?
+  lng           Float?
+  bedrooms      Int?
+  bathrooms     Int?
+  balconies     Int?
+  carpetArea    Int?
+  superArea     Int?
+  floor         Int?
+  totalFloors   Int?
+  furnishing    String?
+  facing        String?
+  possession    String?
+  possessionBy  String?
+  amenities     String[]
+  nearby        Json?
+  description   String?
+  reraId        String?
+  price         Int
+  negotiable    Boolean        @default(false)
+  deposit       Int?
+  featured      Boolean        @default(false)
+  views         Int            @default(0)
+  publishedAt   DateTime?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  media         Media[]
+  inquiries     Inquiry[]
+  saved         Saved[]
+
+  @@index([status, purpose, city])
+}
+
+model Media {
+  id         Int       @id @default(autoincrement())
+  propertyId Int
+  property   Property  @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  kind       MediaKind
+  url        String
+  sort       Int       @default(0)
+}
+
+model Inquiry {
+  id         Int         @id @default(autoincrement())
+  propertyId Int
+  property   Property    @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  userId     Int
+  user       User        @relation(fields: [userId], references: [id])
+  kind       InquiryKind
+  visitAt    DateTime?
+  phone      String
+  note       String?
+  handled    Boolean     @default(false)
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  messages   Message[]
+
+  @@index([propertyId])
+  @@index([userId])
+}
+
+model Message {
+  id        Int      @id @default(autoincrement())
+  inquiryId Int
+  inquiry   Inquiry  @relation(fields: [inquiryId], references: [id], onDelete: Cascade)
+  sender    Sender
+  body      String
+  createdAt DateTime @default(now())
+}
+
+model Saved {
+  userId     Int
+  propertyId Int
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+
+  @@id([userId, propertyId])
+}
+
+model Notification {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  body      String?
+  href      String?
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([userId, read])
+}
