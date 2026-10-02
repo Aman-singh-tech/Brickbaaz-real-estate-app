@@ -1,9 +1,12 @@
 import { Logo } from "@/components/ui";
 import CityPicker from "@/components/CityPicker";
+import { activeCities } from "@/lib/properties";
+import { CITIES } from "@/lib/format";
 
 export const metadata = { title: "Welcome" };
 
-export default function Welcome() {
+export default async function Welcome() {
+  const cities = await activeCities(CITIES.map((c) => c.name));
   return (
     <div className="flex flex-1 flex-col justify-center gap-5 px-5 py-10 text-center">
       <Logo size="text-2xl" />
@@ -12,7 +15,7 @@ export default function Welcome() {
       </div>
       <h1 className="text-[28px] font-extrabold leading-tight tracking-tight">Find your dream home in India</h1>
       <p className="-mt-2 text-sm text-mute">Pick your city to see homes near you.</p>
-      <CityPicker />
+      <CityPicker cities={cities} />
     </div>
   );
 }

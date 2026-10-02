@@ -2,8 +2,8 @@ import Link from "next/link";
 import { getPurpose, getCity } from "@/components/TopBar";
 import PropertyCard from "@/components/PropertyCard";
 import { Card, Icon, Pill, SectionTitle, btn } from "@/components/ui";
-import { CITIES, TYPE_LABEL } from "@/lib/format";
-import { categoryCounts, featured, savedIds } from "@/lib/properties";
+import { CITIES, TYPE_LABEL, cityLabel } from "@/lib/format";
+import { activeCities, categoryCounts, featured, savedIds } from "@/lib/properties";
 import { getBuyer } from "@/lib/auth";
 
 export const metadata = { title: "Explore homes" };
@@ -23,6 +23,7 @@ export default async function Explore() {
     featured(purpose === "rent" ? "RENT" : "SALE", city, 5),
     savedIds(user?.id),
   ]);
+  const cities = await activeCities(CITIES.map((c) => c.name));
   const total = Object.values(counts).reduce((a, b) => a + b, 0);
 
   return (
@@ -47,8 +48,8 @@ export default async function Explore() {
             <span className="mb-1 block text-[11px] font-bold text-mute">Selected city</span>
             <select name="city" defaultValue={city} className="w-full rounded-xl border border-line bg-fill px-3.5 py-3 text-sm font-semibold">
               <option value="">All cities</option>
-              {CITIES.map((c) => (
-                <option key={c.name} value={c.name}>{c.name}, {c.state}</option>
+              {cities.map((c) => (
+                <option key={c} value={c}>{cityLabel(c)}</option>
               ))}
             </select>
           </label>
@@ -128,8 +129,8 @@ export default async function Explore() {
       <footer className="space-y-3 text-xs text-mute">
         <p className="text-sm font-extrabold text-ink">Brickbaaz Real Estate</p>
         <div className="flex flex-wrap gap-x-4 gap-y-1">
-          {CITIES.map((c) => (
-            <Link key={c.name} href={`/search?city=${encodeURIComponent(c.name)}`}>{c.name}</Link>
+          {cities.slice(0, 12).map((c) => (
+            <Link key={c} href={`/search?city=${encodeURIComponent(c)}`}>{c}</Link>
           ))}
         </div>
         <div className="flex gap-4">

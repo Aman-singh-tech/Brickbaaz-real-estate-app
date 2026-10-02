@@ -7,8 +7,8 @@ import SearchToolbar from "@/components/SearchToolbar";
 import ResultsMap from "@/components/ResultsMap";
 import SaveButton from "@/components/SaveButton";
 import { Card, btn } from "@/components/ui";
-import { parseFilters, searchProperties, savedIds, PAGE } from "@/lib/properties";
-import { formatPrice, bhkLabel } from "@/lib/format";
+import { parseFilters, searchProperties, savedIds, activeCities, PAGE } from "@/lib/properties";
+import { formatPrice, bhkLabel, CITIES } from "@/lib/format";
 import { getBuyer } from "@/lib/auth";
 
 export const metadata = { title: "Search properties" };
@@ -20,6 +20,7 @@ export default async function SearchPage({ searchParams }) {
   const view = sp.view === "grid" || sp.view === "map" ? sp.view : "list";
   const { items, total } = await searchProperties(view === "map" ? { ...f, limit: 100 } : f);
   const saved = await savedIds(user?.id);
+  const cities = await activeCities(CITIES.map((c) => c.name));
 
   const more = new URLSearchParams(Object.entries(sp).filter(([, v]) => typeof v === "string"));
   more.set("limit", String(f.limit + PAGE));
@@ -31,7 +32,7 @@ export default async function SearchPage({ searchParams }) {
         <span className="pb-1 text-xs font-semibold text-mute">{total} listings</span>
       </div>
       <Suspense>
-        <FilterSheet count={total} city={f.city} />
+        <FilterSheet count={total} city={f.city} cities={cities} />
         <SearchToolbar />
       </Suspense>
 

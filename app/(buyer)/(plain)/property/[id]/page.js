@@ -11,7 +11,7 @@ import { Card, Icon, Pill, SectionTitle } from "@/components/ui";
 import { getProperty } from "@/lib/properties";
 import { prisma } from "@/lib/prisma";
 import { getBuyer, getOwner } from "@/lib/auth";
-import { emi, formatInr, formatPrice, perSqft, stampDuty, TYPE_LABEL, cityLabel } from "@/lib/format";
+import { emi, formatInr, formatPrice, perSqft, TYPE_LABEL, cityLabel } from "@/lib/format";
 
 export async function generateMetadata({ params }) {
   const { id } = await params;
@@ -73,7 +73,7 @@ export default async function PropertyPage({ params, searchParams }) {
             <h1 className="text-[22px] font-extrabold leading-tight tracking-tight">{p.title}</h1>
             <p className="flex items-start gap-1.5 text-[13px] text-mute">
               <Icon name="pin" className="mt-0.5 h-4 w-4 shrink-0" />
-              {[p.society, p.locality, cityLabel(p.city)].filter(Boolean).join(", ")}
+              {[p.society, p.locality, cityLabel(p.city, p.state)].filter(Boolean).join(", ")}
             </p>
           </section>
 
@@ -84,7 +84,6 @@ export default async function PropertyPage({ params, searchParams }) {
                 {p.purpose === "RENT" && <span className="text-sm font-semibold text-mute">/month</span>}
               </span>
               {sq && <span className="text-xs text-mute">{sq}</span>}
-              {p.purpose === "SALE" && <Pill tone="ok">Govt. stamp: {stampDuty(p.city)}%</Pill>}
               {p.negotiable && <Pill tone="soft">Negotiable</Pill>}
             </div>
             {p.deposit != null && <p className="text-xs text-mute">Security deposit <b className="text-ink">{formatInr(p.deposit)}</b></p>}

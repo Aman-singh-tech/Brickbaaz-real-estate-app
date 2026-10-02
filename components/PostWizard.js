@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import BackBar from "@/components/BackBar";
 import Sheet from "@/components/Sheet";
@@ -13,7 +13,7 @@ const STEPS = [["Basic info", "Type & place"], ["Details", "BHK & area"], ["Pric
 const MAX_PHOTOS = 20;
 
 const EMPTY = {
-  purpose: "SALE", type: "APARTMENT", title: "", city: "Mumbai", locality: "", society: "", lat: "", lng: "",
+  purpose: "SALE", type: "APARTMENT", title: "", city: "", state: "", locality: "", society: "", lat: "", lng: "",
   bedrooms: 2, bathrooms: 2, balconies: 1, carpetArea: "", superArea: "", floor: "", totalFloors: "",
   furnishing: "Semi-Furnished", facing: "", possession: "READY", possessionBy: "", amenities: [],
   nearby: [{ label: "", distance: "" }, { label: "", distance: "" }, { label: "", distance: "" }],
@@ -56,6 +56,9 @@ export default function PostWizard({ initial, id: initialId }) {
   const [pinOpen, setPinOpen] = useState(false);
   const [uploading, setUploading] = useState(0);
   const [pending, start] = useTransition();
+  const [q, setQ] = useState("");
+  const [hits, setHits] = useState([]);
+  const [searching, setSearching] = useState(false);
   const photoRef = useRef(null);
   const videoRef = useRef(null);
 
@@ -65,7 +68,49 @@ export default function PostWizard({ initial, id: initialId }) {
   const comm = d.type === "COMMERCIAL";
   const images = d.media.filter((m) => m.kind === "IMAGE");
   const video = d.media.find((m) => m.kind === "VIDEO");
-  const center = CITY_COORDS[d.city];
+  const center = CITY_COORDS[d.city] ?? { lat: 22.9734, lng: 78.6569 }; // whole India when the city is unknown
+  const knownCenter = !!CITY_COORDS[d.city];
+
+  // Location search (OpenStreetMap Nominatim): fills city, state, locality and the map pin.
+  useEffect(() => {
+    const text = q.trim();
+    if (text.length < 3) return;
+    const ctl = new AbortController();
+    const t = setTimeout(async () => {
+      setSearching(true);
+      try {
+        const res = await fetch(
+          `https://nominatim.openstreetmap.org/search?format=jsonv2&addressdetails=1&limit=6&countrycodes=in&q=${encodeURIComponent(text)}`,
+          { signal: ctl.signal, headers: { "Accept-Language": "en" } }
+        );
+        setHits(res.ok ? await res.json() : []);
+      } catch {
+        /* aborted or offline */
+      } finally {
+        setSearching(false);
+      }
+    }, 450);
+    return () => {
+      clearTimeout(t);
+      ctl.abort();
+    };
+  }, [q]);
+
+  function pickPlace(h) {
+    const a = h.address ?? {};
+    const city = a.city || a.town || a.village || a.state_district || a.county || "";
+    const locality = a.suburb || a.neighbourhood || a.city_district || a.quarter || a.road || h.name || "";
+    setD((x) => ({
+      ...x,
+      city: city || x.city,
+      state: a.state || "",
+      locality: locality && locality !== city ? locality : x.locality,
+      lat: Number(h.lat),
+      lng: Number(h.lon),
+    }));
+    setQ("");
+    setHits([]);
+  }
 
   function checkStep(n) {
     if (n === 1) {
@@ -214,13 +259,35 @@ export default function PostWizard({ initial, id: initialId }) {
             </Card>
             <Card className="space-y-3">
               <h2 className="text-[14px] font-extrabold">Location details</h2>
-              <label><Label>City</Label>
-                <select value={d.city} onChange={(e) => set("city", e.target.value)} className={inputCls}>
-                  {CITIES.map((c) => <option key={c.name} value={c.name}>{c.name}, {c.state}</option>)}
-                </select>
-              </label>
+              <div className="relative">
+                <Label>Search location (area, sector, society or city)</Label>
+                <input value={q} onChange={(e) => { setQ(e.target.value); if (e.target.value.trim().length < 3) setHits([]); }} placeholder="e.g. Sector 56 Gurugram" autoComplete="off" className={inputCls} />
+                {(searching || hits.length > 0) && (
+                  <ul className="absolute inset-x-0 top-full z-20 mt-1 max-h-60 overflow-y-auto rounded-xl border border-line bg-white shadow-lg">
+                    {searching && hits.length === 0 && <li className="px-3.5 py-3 text-xs text-mute">Searching…</li>}
+                    {hits.map((h) => (
+                      <li key={h.place_id}>
+                        <button type="button" onClick={() => pickPlace(h)} className="block w-full px-3.5 py-2.5 text-left text-[13px] hover:bg-fill">
+                          <span className="font-bold">{h.name || h.display_name.split(",")[0]}</span>
+                          <span className="block truncate text-[11px] text-mute">{h.display_name}</span>
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                <p className="mt-1 text-[11px] text-mute">Pick a result to fill the city, area and map pin. You can also type them below.</p>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <label><Label>City</Label>
+                  <input value={d.city} list="city-list" onChange={(e) => set("city", e.target.value)} maxLength={60} placeholder="e.g. Gurugram" className={inputCls} />
+                  <datalist id="city-list">{CITIES.map((c) => <option key={c.name} value={c.name} />)}</datalist>
+                </label>
+                <label><Label>State (optional)</Label>
+                  <input value={d.state} onChange={(e) => set("state", e.target.value)} maxLength={60} placeholder="e.g. Haryana" className={inputCls} />
+                </label>
+              </div>
               <label><Label>Locality</Label>
-                <input value={d.locality} onChange={(e) => set("locality", e.target.value)} maxLength={120} placeholder="e.g. Bandra West" className={inputCls} />
+                <input value={d.locality} onChange={(e) => set("locality", e.target.value)} maxLength={120} placeholder="e.g. Sector 56 / Bandra West" className={inputCls} />
               </label>
               <label><Label>Society / project name (optional)</Label>
                 <input value={d.society} onChange={(e) => set("society", e.target.value)} maxLength={120} placeholder="e.g. Palm Grove Apartments" className={inputCls} />
@@ -379,7 +446,7 @@ export default function PostWizard({ initial, id: initialId }) {
             center={center}
             pin={d.lat !== "" && d.lat != null ? { lat: Number(d.lat), lng: Number(d.lng) } : null}
             onPick={(p) => setD((x) => ({ ...x, lat: p.lat, lng: p.lng }))}
-            zoom={d.lat !== "" ? 16 : 12}
+            zoom={d.lat !== "" ? 16 : knownCenter ? 12 : 5}
           />
         </div>
       </Sheet>

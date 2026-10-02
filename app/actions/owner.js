@@ -49,7 +49,7 @@ export async function saveProperty(id, data, publish) {
   }
 
   const fields = {
-    purpose, type: type ?? "APARTMENT", title, city: city ?? "", state: stateOf(city) || null,
+    purpose, type: type ?? "APARTMENT", title, city: city ?? "", state: str(data.state, 60) || stateOf(city) || null,
     locality: locality ?? "", society: str(data.society),
     lat: Number.isFinite(Number(data.lat)) && data.lat !== "" && data.lat != null ? Number(data.lat) : null,
     lng: Number.isFinite(Number(data.lng)) && data.lng !== "" && data.lng != null ? Number(data.lng) : null,
