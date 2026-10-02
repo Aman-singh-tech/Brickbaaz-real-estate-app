@@ -18,7 +18,7 @@ export default async function Account() {
         </div>
       </Card>
       <Card className="divide-y divide-line !py-1">
-        {[["/owner/notifications", "bell", "Notifications"], ["/owner/listings", "list", "All listings"], ["/", "home", "View customer app"]].map(([h, ic, l]) => (
+        {[["/owner/notifications", "bell", "Notifications"], ["/owner/listings", "list", "All listings"], [process.env.APP_URL || "/", "home", "View customer app"]].map(([h, ic, l]) => (
           <Link key={h} href={h} className="flex items-center gap-3 py-3 text-[13.5px] font-bold">
             <span className="grid h-9 w-9 place-items-center rounded-xl bg-fill"><Icon name={ic} className="h-[18px] w-[18px]" /></span>
             <span className="flex-1">{l}</span>

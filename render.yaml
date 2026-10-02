@@ -17,6 +17,8 @@ services:
         fromDatabase:
           name: brickbaaz-db
           property: connectionString
+      - key: OWNER_HOST
+        sync: false # owner app hostname, e.g. owner.brickbaaz.com (leave empty to serve everything on one host)
       - key: SESSION_SECRET
         generateValue: true
       - key: APP_URL
