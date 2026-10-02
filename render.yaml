@@ -1,0 +1,52 @@
+# Render Blueprint: one web service + one Postgres, same region.
+# Dashboard > New > Blueprint > pick this repo. Fill the variables marked "sync: false" when asked.
+services:
+  - type: web
+    name: brickbaaz
+    runtime: node
+    region: singapore
+    plan: free # switch to starter before real users
+    buildCommand: npm ci && npm run build
+    # Runs pending DB migrations on every start (works on the free plan). Move it to preDeployCommand on paid plans.
+    startCommand: npx prisma migrate deploy && npm start
+    healthCheckPath: /welcome
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: brickbaaz-db
+          property: connectionString
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: APP_URL
+        sync: false # e.g. https://brickbaaz.onrender.com (no trailing slash)
+      - key: OWNER_EMAIL
+        sync: false
+      - key: OWNER_PASSWORD
+        sync: false
+      - key: OWNER_NAME
+        sync: false
+      - key: OWNER_PHONE
+        sync: false
+      - key: SUPPORT_PHONE
+        sync: false
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: EMAIL_FROM
+        sync: false
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+
+databases:
+  - name: brickbaaz-db
+    region: singapore
+    plan: free # expires after a while; upgrade before real data
