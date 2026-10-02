@@ -5,14 +5,13 @@ export const cx = (...a) => a.filter(Boolean).join(" ");
 export function Logo({ size = "text-lg" }) {
   return (
     <span className={cx("inline-flex items-center gap-1.5 font-extrabold tracking-tight", size)}>
-      <svg viewBox="0 0 24 24" className="h-[1.15em] w-[1.15em]" aria-hidden="true">
-        <path d="M3 10 9 7v3z" fill="#e07a1f" />
-        <rect x="3" y="10" width="7" height="12" rx="1.5" fill="#e07a1f" />
-        <rect x="9" y="3" width="12" height="19" rx="2" fill="#0b1426" />
-        <g fill="#fff">
-          <rect x="12" y="6" width="2" height="2" rx=".4" /><rect x="16" y="6" width="2" height="2" rx=".4" />
-          <rect x="12" y="10" width="2" height="2" rx=".4" /><rect x="16" y="10" width="2" height="2" rx=".4" />
-          <rect x="12" y="14" width="2" height="2" rx=".4" /><rect x="16" y="14" width="2" height="2" rx=".4" />
+      <svg viewBox="0 0 200 200" className="h-[1.4em] w-[1.4em]" aria-hidden="true">
+        <circle cx="100" cy="100" r="96" fill="#fff" stroke="#0b1426" strokeWidth="8" />
+        <circle cx="100" cy="100" r="82" fill="#0b1426" />
+        <path d="M62 76L100 44L138 76" fill="none" stroke="#e07a1f" strokeWidth="11" strokeLinecap="round" strokeLinejoin="round" />
+        <g transform="translate(68 88) scale(.8) translate(-70 -62)">
+          <path fillRule="evenodd" fill="#fff" d="M70 62H112C134 62 144 74 144 87C144 96 139 103 131 107C142 111 150 120 150 131C150 146 138 156 116 156H70ZM92 80H108C116 80 120 84 120 88C120 92 116 96 108 96H92ZM92 114H110C119 114 124 119 124 124C124 129 119 134 110 134H92Z" />
+          <rect x="66" y="103" width="90" height="6" fill="#0b1426" />
         </g>
       </svg>
       <span className="text-navy">
