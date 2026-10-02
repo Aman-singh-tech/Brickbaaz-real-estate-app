@@ -2,12 +2,13 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { createSession } from "@/lib/session";
 import { normalizeEmail } from "@/lib/password";
+import { publicOrigin } from "@/lib/origin";
 
-const fail = (request, code) => NextResponse.redirect(new URL(`/login?error=${code}`, request.url));
+const fail = (request, code) => NextResponse.redirect(new URL(`/login?error=${code}`, publicOrigin(request)));
 
 export async function GET(request) {
   const sp = request.nextUrl.searchParams;
-  const origin = process.env.APP_URL?.replace(/\/$/, "") || request.nextUrl.origin;
+  const origin = publicOrigin(request);
   const [state, next = "/"] = (request.cookies.get("g_state")?.value ?? "").split("|");
   if (sp.get("error") || !sp.get("code") || !state || state !== sp.get("state")) return fail(request, "google");
 
@@ -47,7 +48,7 @@ export async function GET(request) {
   if (user.role !== "BUYER") return fail(request, "owner");
 
   await createSession("BUYER", user.id);
-  const res = NextResponse.redirect(new URL(next.startsWith("/") && !next.startsWith("//") ? next : "/", request.url));
+  const res = NextResponse.redirect(new URL(next.startsWith("/") && !next.startsWith("//") ? next : "/", origin));
   res.cookies.delete({ name: "g_state", path: "/api/auth/google" });
   return res;
 }

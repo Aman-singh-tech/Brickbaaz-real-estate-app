@@ -1,12 +1,13 @@
 import crypto from "node:crypto";
 import { NextResponse } from "next/server";
+import { publicOrigin } from "@/lib/origin";
 
 // Starts Google sign-in. Requires GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET (see .env.example).
 export async function GET(request) {
   const id = process.env.GOOGLE_CLIENT_ID;
-  if (!id || !process.env.GOOGLE_CLIENT_SECRET) return NextResponse.redirect(new URL("/login?error=google", request.url));
+  if (!id || !process.env.GOOGLE_CLIENT_SECRET) return NextResponse.redirect(new URL("/login?error=google", publicOrigin(request)));
 
-  const origin = process.env.APP_URL?.replace(/\/$/, "") || request.nextUrl.origin;
+  const origin = publicOrigin(request);
   const next = request.nextUrl.searchParams.get("next") ?? "/";
   const state = crypto.randomBytes(16).toString("base64url");
 
