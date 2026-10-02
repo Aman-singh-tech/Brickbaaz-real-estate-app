@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { getPurpose, getCity } from "@/components/TopBar";
 import PropertyCard from "@/components/PropertyCard";
-import { Card, Icon, Pill, SectionTitle, btn } from "@/components/ui";
+import Hero from "@/components/Hero";
+import { Card, Icon, SectionTitle, btn } from "@/components/ui";
 import { CITIES, TYPE_LABEL, cityLabel } from "@/lib/format";
 import { activeCities, categoryCounts, featured, savedIds } from "@/lib/properties";
 import { getBuyer } from "@/lib/auth";
@@ -28,13 +29,9 @@ export default async function Explore() {
 
   return (
     <div className="space-y-6 px-4 pb-8 pt-5">
-      <section className="space-y-3">
-        <Pill tone="brand">INDIA&apos;S ZERO-BROKERAGE REAL ESTATE APP</Pill>
-        <h1 className="text-[28px] font-extrabold leading-[1.1] tracking-tight">Find your dream home in India</h1>
-        <p className="text-sm text-mute">Explore verified-contact homes with zero brokerage and transparent pricing.</p>
-      </section>
+      <Hero />
 
-      <Card className="space-y-3 !p-4 shadow-sm">
+      <Card className="relative z-10 space-y-3 !p-4 shadow-lg" style={{ marginTop: -56 }}>
         <form action="/search" className="space-y-3">
           <div className="grid grid-cols-2 rounded-xl bg-fill p-1 text-center text-[13px] font-bold">
             {[["sale", "Buy Properties"], ["rent", "Rent Homes"]].map(([v, l]) => (

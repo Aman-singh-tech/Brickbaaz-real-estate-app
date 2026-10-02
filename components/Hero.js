@@ -1,0 +1,68 @@
+import fs from "node:fs";
+import path from "node:path";
+import { Pill } from "@/components/ui";
+
+// Explore hero. Drop a photo at public/hero.jpg (landscape, ~1600px wide) and it is used automatically;
+// until then a drawn city skyline is shown.
+const hasPhoto = () => {
+  try {
+    return fs.existsSync(path.join(process.cwd(), "public", "hero.jpg"));
+  } catch {
+    return false;
+  }
+};
+
+const TOWERS = [
+  // x, width, height, shade
+  [0, 34, 92, "#14213d"], [30, 40, 132, "#1a2a4d"], [68, 30, 78, "#14213d"], [96, 46, 158, "#22345c"],
+  [140, 34, 104, "#1a2a4d"], [172, 42, 142, "#14213d"], [212, 30, 86, "#22345c"], [240, 48, 170, "#1a2a4d"],
+  [286, 34, 110, "#14213d"], [318, 44, 136, "#22345c"], [360, 32, 90, "#1a2a4d"],
+];
+
+function Skyline() {
+  return (
+    <svg viewBox="0 0 400 220" preserveAspectRatio="xMidYMax slice" className="absolute inset-0 h-full w-full" aria-hidden="true">
+      <defs>
+        <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#0b1426" />
+          <stop offset=".62" stopColor="#1d3158" />
+          <stop offset="1" stopColor="#c8692a" />
+        </linearGradient>
+      </defs>
+      <rect width="400" height="220" fill="url(#sky)" />
+      <circle cx="318" cy="132" r="30" fill="#f3a254" opacity=".9" />
+      <circle cx="318" cy="132" r="46" fill="#f3a254" opacity=".14" />
+      {TOWERS.map(([x, w, h, c], i) => (
+        <g key={i}>
+          <rect x={x} y={220 - h} width={w} height={h} fill={c} />
+          {Array.from({ length: Math.floor((h - 14) / 14) }).map((_, r) =>
+            Array.from({ length: Math.floor((w - 8) / 10) }).map((__, k) => {
+              const lit = (i * 7 + r * 3 + k * 5) % 4 === 0;
+              return <rect key={`${r}-${k}`} x={x + 6 + k * 10} y={220 - h + 8 + r * 14} width="4.5" height="7" rx="1" fill={lit ? "#f3a254" : "#ffffff"} opacity={lit ? 0.95 : 0.1} />;
+            })
+          )}
+        </g>
+      ))}
+    </svg>
+  );
+}
+
+export default function Hero() {
+  const photo = hasPhoto();
+  return (
+    <section className="relative -mx-4 -mt-5 h-[260px] overflow-hidden bg-navy">
+      {photo ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src="/hero.jpg" alt="" className="absolute inset-0 h-full w-full object-cover" fetchPriority="high" />
+      ) : (
+        <Skyline />
+      )}
+      <div className="absolute inset-0 bg-gradient-to-t from-navy/85 via-navy/35 to-navy/20" />
+      <div className="relative flex h-full flex-col justify-end gap-2 px-5 pb-16">
+        <Pill tone="brand" className="self-start">INDIA&apos;S ZERO-BROKERAGE REAL ESTATE APP</Pill>
+        <h1 className="text-[28px] font-extrabold leading-[1.1] tracking-tight text-white">Find your dream home in India</h1>
+        <p className="text-[13px] text-white/80">Homes with zero brokerage and a direct owner desk.</p>
+      </div>
+    </section>
+  );
+}
