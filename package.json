@@ -9,7 +9,8 @@
     "lint": "eslint",
     "postinstall": "prisma generate",
     "db:deploy": "prisma migrate deploy",
-    "db:seed": "node prisma/seed.js"
+    "db:seed": "node prisma/seed.js",
+    "test:projects": "node tests/projects.e2e.mjs"
   },
   "dependencies": {
     "@prisma/client": "^6.19.3",
@@ -23,9 +24,11 @@
   "devDependencies": {
     "@emnapi/core": "^1.11.3",
     "@emnapi/runtime": "^1.11.3",
+    "@playwright/test": "^1.63.0",
     "@tailwindcss/postcss": "^4",
     "eslint": "^9",
     "eslint-config-next": "16.3.6",
+    "prettier": "^3.9.9",
     "tailwindcss": "^4"
   },
   "engines": {

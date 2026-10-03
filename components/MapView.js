@@ -15,6 +15,7 @@ export default function MapView({ markers = [], pin = null, onPick, className = 
 
   useEffect(() => {
     let dead = false;
+    let resizeTimer;
     (async () => {
       const L = (await import("leaflet")).default;
       if (dead || !el.current) return;
@@ -35,10 +36,11 @@ export default function MapView({ markers = [], pin = null, onPick, className = 
       map.current = { L, m };
       if (onPick) m.on("click", (e) => cb.current.onPick?.({ lat: e.latlng.lat, lng: e.latlng.lng }));
       draw();
-      setTimeout(() => m.invalidateSize(), 150);
+      resizeTimer = setTimeout(() => { if (!dead) m.invalidateSize(); }, 150);
     })();
     return () => {
       dead = true;
+      clearTimeout(resizeTimer);
       map.current?.m.remove();
       map.current = null;
     };

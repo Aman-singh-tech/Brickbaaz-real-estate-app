@@ -6,7 +6,7 @@ import { Icon, cx } from "@/components/ui";
 
 const BUYER = [
   { href: "/", label: "Explore", icon: "home", match: (p) => p === "/" },
-  { href: "/search", label: "Search", icon: "search", match: (p) => p.startsWith("/search") || p.startsWith("/property") },
+  { href: "/search", label: "Search", icon: "search", match: (p) => p.startsWith("/search") || p.startsWith("/property") || p.startsWith("/projects") || p.startsWith("/builders") },
   { href: "/saved", label: "Saved", icon: "heart", match: (p) => p.startsWith("/saved") },
   { href: "/profile", label: "Profile", icon: "user", match: (p) => p.startsWith("/profile") || p.startsWith("/inquiries") || p.startsWith("/notifications") },
 ];

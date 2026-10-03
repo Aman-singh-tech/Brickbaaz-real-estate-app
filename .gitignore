@@ -45,3 +45,8 @@ next-env.d.ts
 
 # user uploads
 /uploads
+
+# Local verification artifacts
+/.tmp-projects/
+/test-results/
+/playwright-report/
