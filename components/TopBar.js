@@ -4,13 +4,14 @@ import { Logo, Icon } from "@/components/ui";
 import PurposeToggle from "@/components/PurposeToggle";
 import { getBuyer } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { DEFAULT_CITY, canonicalCity } from "@/lib/city";
 
 export async function getPurpose() {
   return (await cookies()).get("purpose")?.value === "rent" ? "rent" : "sale";
 }
 
 export async function getCity() {
-  return (await cookies()).get("city")?.value ?? "Mumbai";
+  return canonicalCity((await cookies()).get("city")?.value || DEFAULT_CITY);
 }
 
 // Customer app header: logo, Buy/Rent toggle, bell, avatar/login.

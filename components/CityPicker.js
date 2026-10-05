@@ -5,10 +5,11 @@ import { useRouter } from "next/navigation";
 import { setCity } from "@/app/actions/buyer";
 import { cityLabel } from "@/lib/format";
 import { btn, cx } from "@/components/ui";
+import { DEFAULT_CITY } from "@/lib/city";
 
 export default function CityPicker({ cities }) {
   const router = useRouter();
-  const [city, set] = useState(cities[0] ?? "Mumbai");
+  const [city, set] = useState(DEFAULT_CITY);
   const [pending, start] = useTransition();
   const go = (to) =>
     start(async () => {
