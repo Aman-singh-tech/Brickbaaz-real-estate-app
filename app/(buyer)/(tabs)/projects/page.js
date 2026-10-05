@@ -2,7 +2,6 @@ export const dynamic = "force-dynamic";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import {
-  projectCities,
   projectInclude,
   projectWhere,
   priceOf,
@@ -11,13 +10,14 @@ import { Card, inputCls, btn } from "@/components/ui";
 import ProjectMap from "@/components/projects/ProjectMap";
 import { formatInr } from "@/lib/format";
 import ProjectCard from "@/components/projects/ProjectCard";
+import { CUSTOMER_CITIES, DEFAULT_CITY } from "@/lib/city";
 export const metadata = { title: "Builder projects" };
 export default async function Projects({ searchParams }) {
-  const sp = await searchParams,
+  const sp = { ...(await searchParams), city: DEFAULT_CITY },
     where = projectWhere(sp),
     limit = Math.min(100, Math.max(12, Number(sp.limit) || 12));
-  const [cities, raw, total] = await Promise.all([
-    projectCities(),
+  const cities = CUSTOMER_CITIES;
+  const [raw, total] = await Promise.all([
     prisma.project.findMany({
       where,
       include: projectInclude,
@@ -56,7 +56,6 @@ export default async function Projects({ searchParams }) {
             aria-label="City"
             className={inputCls}
           >
-            <option value="">All cities</option>
             {cities.map((c) => (
               <option key={c} value={c}>
                 {c}

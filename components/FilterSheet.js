@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Sheet from "@/components/Sheet";
 import { Icon, cx, btn } from "@/components/ui";
 import { TYPE_LABEL } from "@/lib/format";
+import { CUSTOMER_CITIES, DEFAULT_CITY } from "@/lib/city";
 
 const SALE_STEPS = [0, 1e6, 2.5e6, 5e6, 7.5e6, 1e7, 1.5e7, 2e7, 2.5e7, 3e7, 5e7, 1e8];
 const RENT_STEPS = [0, 10000, 20000, 30000, 50000, 75000, 100000, 200000];
@@ -30,7 +31,8 @@ function Chip({ on, children, ...p }) {
 }
 
 // Filter chip bar + sheet. Filters live in the URL so results are shareable and server-rendered.
-export default function FilterSheet({ count, city, cities = [] }) {
+export default function FilterSheet({ count }) {
+  const cities = CUSTOMER_CITIES;
   const router = useRouter();
   const sp = useSearchParams();
   const rent = sp.get("p") === "rent";
@@ -46,7 +48,7 @@ export default function FilterSheet({ count, city, cities = [] }) {
       type: csv(sp.get("type")),
       poss: csv(sp.get("poss")),
       furn: csv(sp.get("furn")),
-      city: sp.get("city") ?? city ?? "",
+      city: DEFAULT_CITY,
     });
     setOpen(true);
   };
@@ -115,7 +117,6 @@ export default function FilterSheet({ count, city, cities = [] }) {
         {f && (
           <>
             <Group title="City">
-              <Chip on={!f.city} onClick={() => setF({ ...f, city: "" })}>All</Chip>
               {cities.map((c) => (
                 <Chip key={c} on={f.city === c} onClick={() => setF({ ...f, city: c })}>
                   {c}

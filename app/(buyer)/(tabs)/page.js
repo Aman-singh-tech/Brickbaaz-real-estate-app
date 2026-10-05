@@ -6,9 +6,9 @@ import { prisma } from "@/lib/prisma";
 import { projectInclude } from "@/lib/projects";
 import Hero from "@/components/Hero";
 import { Card, Icon, SectionTitle, btn } from "@/components/ui";
-import { CITIES, TYPE_LABEL, cityLabel } from "@/lib/format";
+import { TYPE_LABEL, cityLabel } from "@/lib/format";
+import { CUSTOMER_CITIES } from "@/lib/city";
 import {
-  activeCities,
   categoryCounts,
   featured,
   savedIds,
@@ -36,7 +36,7 @@ export default async function Explore() {
     featured(purpose === "rent" ? "RENT" : "SALE", city, 5),
     savedIds(user?.id),
   ]);
-  const cities = await activeCities(CITIES.map((c) => c.name));
+  const cities = CUSTOMER_CITIES;
   const projects = await prisma.project.findMany({
     where: { status: "PUBLISHED" },
     include: projectInclude,
@@ -83,7 +83,6 @@ export default async function Explore() {
               defaultValue={city}
               className="w-full rounded-xl border border-line bg-fill px-3.5 py-3 text-sm font-semibold"
             >
-              <option value="">All cities</option>
               {cities.map((c) => (
                 <option key={c} value={c}>
                   {cityLabel(c)}
