@@ -13,9 +13,15 @@ export default function LeadForm(props) {
     />
   );
 }
-function RequestForm({ projectId, source, campaign, onAnother }) {
+function RequestForm({
+  projectId,
+  source,
+  campaign,
+  onAnother,
+  visitsOnly = false,
+}) {
   const [state, action] = useActionState(createProjectLead, null),
-    [kind, setKind] = useState("ENQUIRY");
+    [kind, setKind] = useState(visitsOnly ? "VISIT" : "ENQUIRY");
   if (state?.ok)
     return (
       <Card className="!bg-brand-soft">
@@ -35,7 +41,9 @@ function RequestForm({ projectId, source, campaign, onAnother }) {
     );
   return (
     <Card>
-      <h2 className="mb-4 text-lg font-bold">Interested in this project?</h2>
+      <h2 className="mb-4 text-lg font-bold">
+        {visitsOnly ? "Plan a site visit" : "Interested in this project?"}
+      </h2>
       <form
         action={(fd) => {
           for (const key of ["visitAt", "followUpAt"]) {
@@ -57,7 +65,9 @@ function RequestForm({ projectId, source, campaign, onAnother }) {
             onChange={(e) => setKind(e.target.value)}
             className={inputCls}
           >
-            <option value="ENQUIRY">Get price and project details</option>
+            {!visitsOnly && (
+              <option value="ENQUIRY">Get price and project details</option>
+            )}
             <option value="VISIT">Request a site visit</option>
           </select>
         </Field>

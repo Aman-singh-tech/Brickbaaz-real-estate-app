@@ -9,6 +9,7 @@ import { Card, Pill } from "@/components/ui";
 import { formatInr, imgUrl } from "@/lib/format";
 import Gallery from "@/components/Gallery";
 import MiniMap from "@/components/MiniMap";
+import InterestForm from "@/components/InterestForm";
 import EmiCalculator from "@/components/EmiCalculator";
 import LeadForm from "@/components/projects/LeadForm";
 import SaveProject from "@/components/projects/SaveProject";
@@ -129,8 +130,16 @@ export default async function ProjectDetail({ params, searchParams }) {
         </div>
       )}
       <LeadForm
+        visitsOnly
         projectId={p.id}
         source={sp.utm_source}
+        campaign={sp.utm_campaign}
+      />
+      <InterestForm
+        type="PROJECT"
+        referenceId={p.id}
+        title={p.name}
+        source={sp.utm_source || "website"}
         campaign={sp.utm_campaign}
       />
       {prices.length > 0 && <EmiCalculator price={Math.min(...prices)} />}

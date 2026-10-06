@@ -308,3 +308,52 @@ model SavedProject {
   createdAt DateTime @default(now())
   @@id([userId, projectId])
 }
+
+model CrmLead {
+  id Int @id @default(autoincrement())
+  name String
+  phone String
+  email String?
+  type String
+  interest String
+  message String?
+  source String @default("website")
+  campaign String?
+  stage String @default("NEW")
+  amount Decimal? @db.Decimal(14,2)
+  propertyId Int?
+  projectId Int?
+  inquiryId Int? @unique
+  projectLeadId Int? @unique
+  followUpAt DateTime?
+  visitAt DateTime?
+  consentAt DateTime?
+  importedBy Int?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  activities CrmActivity[]
+  @@index([stage, followUpAt])
+  @@index([phone])
+  @@index([type, source])
+}
+
+model CrmActivity {
+  id Int @id @default(autoincrement())
+  leadId Int
+  lead CrmLead @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  body String
+  createdAt DateTime @default(now())
+}
+
+model Testimonial {
+  id Int @id @default(autoincrement())
+  name String
+  feedback String
+  reference String?
+  imageUrl String?
+  videoUrl String?
+  published Boolean @default(false)
+  sort Int @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

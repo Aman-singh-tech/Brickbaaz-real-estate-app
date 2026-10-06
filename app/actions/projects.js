@@ -5,6 +5,8 @@ import { getOwner, getBuyer } from "@/lib/auth";
 import { isMediaUrl } from "@/lib/media";
 import { normalizePhone } from "@/lib/otp";
 import { tooMany } from "@/lib/ratelimit";
+import { mirrorProject } from "@/lib/crm";
+import { legacyStage } from "@/lib/crm-options";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 const stages = [
@@ -46,15 +48,13 @@ export async function saveProject(id, d) {
   const status = ["DRAFT", "PUBLISHED", "ARCHIVED"].includes(d.status)
     ? d.status
     : "DRAFT";
-  const configurations = (d.configurations ?? [])
-    .slice(0, 30)
-    .map((c) => ({
-      label: clean(c.label, 60),
-      bedrooms: c.bedrooms ? Number(c.bedrooms) : null,
-      area: Number(c.area),
-      price: c.price === "" || c.price == null ? null : Number(c.price),
-      floorPlan: c.floorPlan && isMediaUrl(c.floorPlan) ? c.floorPlan : null,
-    }));
+  const configurations = (d.configurations ?? []).slice(0, 30).map((c) => ({
+    label: clean(c.label, 60),
+    bedrooms: c.bedrooms ? Number(c.bedrooms) : null,
+    area: Number(c.area),
+    price: c.price === "" || c.price == null ? null : Number(c.price),
+    floorPlan: c.floorPlan && isMediaUrl(c.floorPlan) ? c.floorPlan : null,
+  }));
   if (
     configurations.some(
       (c) =>
@@ -180,19 +180,23 @@ export async function createProjectLead(_prev, fd) {
   const visitAt = kind === "VISIT" ? new Date(String(fd.get("visitAt"))) : null;
   if (visitAt && (isNaN(visitAt) || visitAt <= new Date()))
     return { error: "Choose a future visit time." };
-  const lead = await prisma.projectLead.create({
-    data: {
-      projectId,
-      name,
-      phone,
-      email: email || null,
-      kind,
-      visitAt,
-      pickupAddress: clean(fd.get("pickupAddress"), 300) || null,
-      consentAt: new Date(),
-      source: clean(fd.get("source"), 100) || "website",
-      campaign: clean(fd.get("campaign"), 100) || null,
-    },
+  const lead = await prisma.$transaction(async (tx) => {
+    const created = await tx.projectLead.create({
+      data: {
+        projectId,
+        name,
+        phone,
+        email: email || null,
+        kind,
+        visitAt,
+        pickupAddress: clean(fd.get("pickupAddress"), 300) || null,
+        consentAt: new Date(),
+        source: clean(fd.get("source"), 100) || "website",
+        campaign: clean(fd.get("campaign"), 100) || null,
+      },
+    });
+    await mirrorProject(tx, created, p);
+    return created;
   });
   const owner = await prisma.user.findFirst({ where: { role: "OWNER" } });
   if (owner)
@@ -205,6 +209,7 @@ export async function createProjectLead(_prev, fd) {
       },
     });
   refresh(p.slug);
+  revalidatePath("/owner/crm");
   return { ok: true };
 }
 export async function updateLead(_prev, fd) {
@@ -231,6 +236,18 @@ export async function updateLead(_prev, fd) {
       ...(note ? { notes: { create: { body: note } } } : {}),
     },
   });
+  const crm = await prisma.crmLead.findUnique({ where: { projectLeadId: id } });
+  if (crm)
+    await prisma.crmLead.update({
+      where: { id: crm.id },
+      data: {
+        stage: legacyStage(stage),
+        followUpAt,
+        visitAt,
+        ...(note ? { activities: { create: { body: note } } } : {}),
+      },
+    });
+  revalidatePath("/owner/crm");
   revalidatePath(`/owner/leads/${id}`);
   refresh();
   return { ok: true };

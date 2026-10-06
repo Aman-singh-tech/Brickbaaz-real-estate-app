@@ -2,17 +2,14 @@ import Link from "next/link";
 import { getPurpose, getCity } from "@/components/TopBar";
 import PropertyCard from "@/components/PropertyCard";
 import ProjectCard from "@/components/projects/ProjectCard";
+import TestimonialCard from "@/components/TestimonialCard";
 import { prisma } from "@/lib/prisma";
 import { projectInclude } from "@/lib/projects";
 import Hero from "@/components/Hero";
 import { Card, Icon, SectionTitle, btn } from "@/components/ui";
 import { TYPE_LABEL, cityLabel } from "@/lib/format";
 import { CUSTOMER_CITIES, cityWhere } from "@/lib/city";
-import {
-  categoryCounts,
-  featured,
-  savedIds,
-} from "@/lib/properties";
+import { categoryCounts, featured, savedIds } from "@/lib/properties";
 import { getBuyer } from "@/lib/auth";
 
 export const metadata = { title: "Explore homes" };
@@ -44,6 +41,11 @@ export default async function Explore() {
     take: 3,
   });
   const total = Object.values(counts).reduce((a, b) => a + b, 0);
+  const stories = await prisma.testimonial.findMany({
+    where: { published: true },
+    orderBy: [{ sort: "asc" }, { createdAt: "desc" }],
+    take: 3,
+  });
 
   return (
     <div className="home-page space-y-8 px-4 pb-10 pt-6 md:space-y-12">
@@ -121,6 +123,41 @@ export default async function Explore() {
         </div>
       </Card>
 
+      <section className="grid gap-4 md:grid-cols-2">
+        <Link
+          href="/services"
+          className="owner-banner rounded-3xl p-6 text-white"
+        >
+          <p className="text-xs font-bold tracking-widest text-[#f2bc87]">
+            LOANS & FINANCE
+          </p>
+          <h2 className="mt-3 text-2xl font-extrabold">
+            Your plans. Our assistance.
+          </h2>
+          <p className="mt-3 text-sm text-white/70">
+            Home, business, personal, education and more.
+          </p>
+          <p className="mt-5 text-sm font-bold">Explore loan services →</p>
+        </Link>
+        <Link
+          href="/testimonials"
+          className="rounded-3xl border border-line bg-white p-6"
+        >
+          <p className="text-xs font-bold tracking-widest text-brand">
+            CUSTOMER STORIES
+          </p>
+          <h2 className="mt-3 text-2xl font-extrabold">
+            Hear it from our customers.
+          </h2>
+          <p className="mt-3 text-sm text-mute">
+            Feedback, photos and video stories.
+          </p>
+          <p className="mt-5 text-sm font-bold text-brand">
+            View testimonials →
+          </p>
+        </Link>
+      </section>
+
       <section className="space-y-3">
         <SectionTitle action="View all →" href={`/search?p=${purpose}`}>
           Explore categories
@@ -177,9 +214,11 @@ export default async function Explore() {
             New homes in {city} are on their way. Check back soon.
           </Card>
         ) : (
-          <div className="property-grid space-y-4">{items.map((p) => (
-            <PropertyCard key={p.id} property={p} saved={saved.has(p.id)} />
-          ))}</div>
+          <div className="property-grid space-y-4">
+            {items.map((p) => (
+              <PropertyCard key={p.id} property={p} saved={saved.has(p.id)} />
+            ))}
+          </div>
         )}
         {items.length > 0 && (
           <Link
@@ -211,12 +250,28 @@ export default async function Explore() {
           New builder projects
         </SectionTitle>
         {projects.length ? (
-          <div className="project-grid space-y-4">{projects.map((p) => <ProjectCard key={p.id} project={p} />)}</div>
+          <div className="project-grid space-y-4">
+            {projects.map((p) => (
+              <ProjectCard key={p.id} project={p} />
+            ))}
+          </div>
         ) : (
           <Card>New projects coming soon.</Card>
         )}
       </section>
       <footer className="space-y-3 text-xs text-mute">
+        {stories.length > 0 && (
+          <section className="space-y-4">
+            <SectionTitle action="All stories" href="/testimonials">
+              What our customers say
+            </SectionTitle>
+            <div className="project-grid space-y-4">
+              {stories.map((t) => (
+                <TestimonialCard key={t.id} item={t} />
+              ))}
+            </div>
+          </section>
+        )}
         <p className="text-sm font-extrabold text-ink">Brickbaaz Real Estate</p>
         <div className="flex flex-wrap gap-x-4 gap-y-1">
           {cities.slice(0, 12).map((c) => (
@@ -228,6 +283,8 @@ export default async function Explore() {
         <div className="flex gap-4">
           <Link href="/terms">Terms</Link>
           <Link href="/privacy">Privacy</Link>
+          <Link href="/services">Loan services</Link>
+          <Link href="/testimonials">Testimonials</Link>
         </div>
         <p>© {new Date().getFullYear()} Brickbaaz Technologies Pvt Ltd.</p>
       </footer>
