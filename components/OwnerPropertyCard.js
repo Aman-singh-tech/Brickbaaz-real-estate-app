@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { Card, Icon, Pill, btn, cx } from "@/components/ui";
 import { setStatus, setFeatured, deleteProperty } from "@/app/actions/owner";
 import { formatPrice, STATUS_LABEL, perSqft } from "@/lib/format";
+import { Cover } from "@/components/PropertyCard";
 
 const TONE = { ACTIVE: "ok", DRAFT: "brand", PAUSED: "soft", RENTED: "dark", SOLD: "dark" };
 
@@ -31,6 +32,7 @@ export default function OwnerPropertyCard({ p, inquiries }) {
 
   return (
     <Card className={cx("space-y-2.5", pending && "opacity-60")}>
+      <Link href={`/owner/post?edit=${p.id}`} aria-label={`Edit ${p.title}`} className="block"><Cover property={p} className="h-36" /></Link>
       <div className="flex items-center gap-2">
         <Pill tone={TONE[p.status]}>{p.status === "ACTIVE" ? "● " : ""}{STATUS_LABEL[p.status].toUpperCase()}</Pill>
         <Pill tone="soft">{p.purpose === "RENT" ? "RENT" : "SALE"}</Pill>

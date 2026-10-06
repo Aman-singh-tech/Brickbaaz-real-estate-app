@@ -13,7 +13,7 @@ export default async function Listings({ searchParams }) {
   const { f = "all" } = await searchParams;
   const where = { ownerId: owner.id, ...(f === "done" ? { status: { in: ["RENTED", "SOLD"] } } : f !== "all" ? { status: f } : {}) };
   const [props, counts] = await Promise.all([
-    prisma.property.findMany({ where, orderBy: { updatedAt: "desc" } }),
+    prisma.property.findMany({ where, orderBy: { updatedAt: "desc" }, include: { media: { where: { kind: "IMAGE" }, orderBy: { sort: "asc" }, take: 1 } } }),
     prisma.inquiry.groupBy({ by: ["propertyId"], where: { property: { ownerId: owner.id } }, _count: { _all: true } }),
   ]);
   const byProp = Object.fromEntries(counts.map((c) => [c.propertyId, c._count._all]));

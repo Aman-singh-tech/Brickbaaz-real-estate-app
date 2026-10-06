@@ -7,7 +7,7 @@ import { projectInclude } from "@/lib/projects";
 import Hero from "@/components/Hero";
 import { Card, Icon, SectionTitle, btn } from "@/components/ui";
 import { TYPE_LABEL, cityLabel } from "@/lib/format";
-import { CUSTOMER_CITIES } from "@/lib/city";
+import { CUSTOMER_CITIES, cityWhere } from "@/lib/city";
 import {
   categoryCounts,
   featured,
@@ -38,7 +38,7 @@ export default async function Explore() {
   ]);
   const cities = CUSTOMER_CITIES;
   const projects = await prisma.project.findMany({
-    where: { status: "PUBLISHED" },
+    where: { status: "PUBLISHED", ...cityWhere(city) },
     include: projectInclude,
     orderBy: [{ featured: "desc" }, { createdAt: "desc" }],
     take: 3,
@@ -46,11 +46,11 @@ export default async function Explore() {
   const total = Object.values(counts).reduce((a, b) => a + b, 0);
 
   return (
-    <div className="space-y-6 px-4 pb-8 pt-5">
+    <div className="home-page space-y-8 px-4 pb-10 pt-6 md:space-y-12">
       <Hero />
 
       <Card
-        className="relative z-10 space-y-3 !p-4 shadow-lg"
+        className="home-search relative z-10 space-y-4 !rounded-3xl !p-5 shadow-xl md:!p-7"
         style={{ marginTop: -56 }}
       >
         <form action="/search" className="space-y-3">
@@ -96,7 +96,7 @@ export default async function Explore() {
             </span>
             <input
               name="q"
-              placeholder="e.g. Bandra West, 3 BHK, Whitefield"
+              placeholder="e.g. Sector 67, Golf Course Road, 3 BHK"
               className="w-full rounded-xl border border-line bg-fill px-3.5 py-3 text-sm outline-none focus:border-navy"
             />
           </label>
@@ -125,12 +125,12 @@ export default async function Explore() {
         <SectionTitle action="View all →" href={`/search?p=${purpose}`}>
           Explore categories
         </SectionTitle>
-        <div className="grid grid-cols-3 gap-2.5">
+        <div className="category-grid grid grid-cols-3 gap-2.5">
           {CATS.map(([t]) => (
             <Link
               key={t}
               href={`/search?p=${purpose}&type=${t}`}
-              className="rounded-2xl border border-line bg-white p-3 text-center"
+              className="rounded-2xl border border-line bg-white p-4 text-center transition hover:-translate-y-1 hover:border-brand/40 hover:shadow-lg md:p-6"
             >
               <span className="mx-auto mb-1.5 grid h-9 w-9 place-items-center rounded-xl bg-brand-soft text-brand">
                 <Icon
@@ -154,12 +154,12 @@ export default async function Explore() {
       <section className="grid grid-cols-3 gap-2 rounded-3xl bg-navy p-4 text-white">
         <p className="col-span-3 flex items-center gap-2 text-sm font-extrabold">
           <Icon name="shield" className="h-4 w-4 text-brand" /> The Brickbaaz
-          Guarantee
+          Advantage
         </p>
         {[
-          ["Zero Brokerage", "Save up to 2%"],
+          ["Zero Brokerage", "More value for you"],
           ["Direct Contact", "Owner desk"],
-          ["Instant Visit", "Same-day slot"],
+          ["Site Visits", "Request your preferred slot"],
         ].map(([a, b]) => (
           <div key={a} className="rounded-xl bg-white/10 p-2.5">
             <p className="text-[11.5px] font-bold">{a}</p>
@@ -174,12 +174,12 @@ export default async function Explore() {
         </SectionTitle>
         {items.length === 0 ? (
           <Card className="py-10 text-center text-sm text-mute">
-            No listings in {city} yet. Try another city.
+            New homes in {city} are on their way. Check back soon.
           </Card>
         ) : (
-          items.map((p) => (
+          <div className="property-grid space-y-4">{items.map((p) => (
             <PropertyCard key={p.id} property={p} saved={saved.has(p.id)} />
-          ))
+          ))}</div>
         )}
         {items.length > 0 && (
           <Link
@@ -211,7 +211,7 @@ export default async function Explore() {
           New builder projects
         </SectionTitle>
         {projects.length ? (
-          projects.map((p) => <ProjectCard key={p.id} project={p} />)
+          <div className="project-grid space-y-4">{projects.map((p) => <ProjectCard key={p.id} project={p} />)}</div>
         ) : (
           <Card>New projects coming soon.</Card>
         )}

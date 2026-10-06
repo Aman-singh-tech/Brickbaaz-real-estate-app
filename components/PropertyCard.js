@@ -39,7 +39,7 @@ export default function PropertyCard({ property: p, saved = false, compact = fal
   const monthly = p.purpose === "SALE" && p.price >= 1e6 ? Math.round(emi(p.price * 0.8, 8.45, 20)) : null;
 
   return (
-    <article className="relative overflow-hidden rounded-3xl border border-line bg-white shadow-sm">
+    <article className="property-card relative overflow-hidden rounded-3xl border border-line bg-white shadow-sm">
       <div className="absolute right-5 top-5 z-10">
         <SaveButton propertyId={p.id} initial={saved} />
       </div>

@@ -28,6 +28,11 @@ export default async function TopBar() {
         <Logo size="text-[14px]" />
       </Link>
       <span className="flex-1" />
+      <nav aria-label="Customer shortcuts" className="mr-8 hidden items-center gap-6 text-sm font-semibold md:flex">
+        <Link href="/">Explore</Link>
+        <Link href="/saved">Saved homes</Link>
+        <Link href="/inquiries">My inquiries</Link>
+      </nav>
       <PurposeToggle value={purpose} />
       <Link
         href="/notifications"

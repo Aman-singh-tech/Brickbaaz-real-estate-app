@@ -38,7 +38,7 @@ export function Pill({ children, tone = "plain", className }) {
 
 export function Card({ children, className, as: Tag = "div", ...rest }) {
   return (
-    <Tag className={cx("rounded-2xl border border-line bg-white p-3.5", className)} {...rest}>
+    <Tag className={cx("premium-card rounded-2xl border border-line bg-white p-3.5", className)} {...rest}>
       {children}
     </Tag>
   );
@@ -65,7 +65,7 @@ export function LinkButton({ href, tone = "primary", className, children, ...res
 export function SectionTitle({ children, action, href }) {
   return (
     <div className="flex items-center justify-between">
-      <h2 className="text-[15px] font-extrabold tracking-tight">{children}</h2>
+      <h2 className="text-lg font-extrabold tracking-tight md:text-2xl">{children}</h2>
       {action && href ? (
         <Link href={href} className="text-xs font-bold text-brand">
           {action}

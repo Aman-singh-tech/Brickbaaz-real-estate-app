@@ -50,18 +50,19 @@ function Skyline() {
 export default function Hero() {
   const photo = hasPhoto();
   return (
-    <section className="relative -mx-4 -mt-5 h-[320px] overflow-hidden bg-navy">
+    <section className="relative -mx-4 -mt-6 h-[400px] overflow-hidden bg-navy md:mx-0 md:mt-0 md:h-[500px] md:rounded-[32px]">
       {photo ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img src="/hero.jpg" alt="" className="absolute inset-0 h-full w-full object-cover object-[50%_62%]" fetchPriority="high" />
       ) : (
         <Skyline />
       )}
-      <div className="absolute inset-0 bg-gradient-to-t from-navy/95 via-navy/45 to-navy/5" />
-      <div className="relative flex h-full flex-col justify-end gap-2 px-5 pb-16">
-        <Pill tone="brand" className="self-start">INDIA&apos;S ZERO-BROKERAGE REAL ESTATE APP</Pill>
-        <h1 className="text-[30px] font-extrabold leading-[1.08] tracking-tight text-white [text-shadow:0_2px_18px_rgb(0_0_0/.45)]">Find your dream home in India</h1>
-        <p className="text-[13px] font-medium text-white/85 [text-shadow:0_1px_8px_rgb(0_0_0/.5)]">Homes with zero brokerage and a direct owner desk.</p>
+      <div className="absolute inset-0 bg-gradient-to-r from-navy/90 via-navy/55 to-navy/20" />
+      <div className="relative flex h-full max-w-3xl flex-col justify-center gap-5 px-6 pb-14 md:px-14 md:pb-20">
+        <Pill tone="brand" className="self-start !px-3 !py-1.5 tracking-wider">GURUGRAM · ZERO BROKERAGE</Pill>
+        <h1 className="text-[38px] font-extrabold leading-[1.08] tracking-tight text-white md:text-[64px]">A better address.<br /><span className="text-[#f2bc87]">A new beginning.</span></h1>
+        <p className="max-w-md text-sm leading-relaxed text-white/80 md:text-base">Discover homes and builder projects in Gurugram. Connect directly, explore freely, and find your place.</p>
+        <div className="flex gap-5 text-[11px] font-semibold text-white/75 md:text-sm"><span>Zero brokerage</span><span>Direct owner desk</span><span>Site visits</span></div>
       </div>
     </section>
   );

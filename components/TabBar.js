@@ -25,7 +25,7 @@ export default function TabBar({ variant = "buyer" }) {
   return (
     <nav
       aria-label="Main"
-      className="sticky bottom-0 z-30 mt-auto flex items-end justify-around border-t border-line bg-white/95 px-1 pt-1.5 backdrop-blur"
+      className="main-tabs sticky bottom-0 z-30 mt-auto flex items-end justify-around border-t border-line bg-white/95 px-1 pt-1.5 backdrop-blur"
       style={{ paddingBottom: "max(8px, env(safe-area-inset-bottom))" }}
     >
       {items.map((t) => {

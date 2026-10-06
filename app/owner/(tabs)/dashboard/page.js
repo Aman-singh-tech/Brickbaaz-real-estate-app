@@ -11,7 +11,7 @@ export default async function Dashboard() {
   const owner = await requireOwner();
   const mine = { property: { ownerId: owner.id } };
   const [props, counts, totalInq, newInq, visits, recent] = await Promise.all([
-    prisma.property.findMany({ where: { ownerId: owner.id }, orderBy: { updatedAt: "desc" }, take: 4 }),
+    prisma.property.findMany({ where: { ownerId: owner.id }, orderBy: { updatedAt: "desc" }, take: 4, include: { media: { where: { kind: "IMAGE" }, orderBy: { sort: "asc" }, take: 1 } } }),
     prisma.inquiry.groupBy({ by: ["propertyId"], where: mine, _count: { _all: true } }),
     prisma.inquiry.count({ where: mine }),
     prisma.inquiry.count({ where: { ...mine, handled: false } }),
@@ -29,22 +29,22 @@ export default async function Dashboard() {
   const promo = props.find((p) => p.status === "ACTIVE" && !p.featured);
 
   return (
-    <div className="space-y-5 px-4 pb-8 pt-4">
-      <Card className="flex items-center gap-3.5">
-        <span className="grid h-14 w-14 place-items-center rounded-full bg-brand text-xl font-extrabold text-white">{(owner.name?.[0] ?? "O").toUpperCase()}</span>
-        <div className="min-w-0 flex-1 space-y-1">
-          <p className="truncate text-base font-extrabold">{owner.name}</p>
-          <p className="text-xs text-mute">Property owner / landlord</p>
-          <Pill tone="ok">✔ Owner account</Pill>
-        </div>
-      </Card>
+    <div className="owner-dashboard space-y-6 px-4 pb-8 pt-5">
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <div><p className="mb-2 text-[10px] font-bold tracking-[.2em] text-brand">YOUR PROPERTY BUSINESS</p><h1 className="text-2xl font-extrabold tracking-tight md:text-3xl">Welcome back, {owner.name?.split(" ")[0] || "Owner"}.</h1><p className="mt-2 text-sm text-mute">Your properties, conversations and next opportunities.</p></div>
+        <Link href="/owner/post" className={btn("brand")}><Icon name="plus" className="h-4 w-4" />Add a property</Link>
+      </div>
+      <section className="owner-banner flex flex-wrap items-center justify-between gap-5 rounded-3xl p-6 text-white md:p-8">
+        <div className="max-w-xl"><Pill tone="brand">OWNER WORKSPACE</Pill><h2 className="mt-4 text-xl font-bold md:text-2xl">Make room for your next deal.</h2><p className="mt-2 text-sm leading-relaxed text-white/60">Keep your inventory fresh, respond to interested buyers and take your next site visit forward.</p></div>
+        <Link href="/owner/leads" className={btn("soft", "!bg-white/10 !text-white")}>Open project leads →</Link>
+      </section>
 
-      <div className="grid grid-cols-3 gap-2.5">
-        {[["Active", active, "/owner/listings", "home"], ["Inquiries", totalInq, "/owner/inquiries", "chat"], ["Visits", visits, "/owner/inquiries?f=visits", "cal"]].map(([l, n, h, ic]) => (
-          <Link key={l} href={h} className="rounded-2xl border border-line bg-white p-3 text-center">
-            <Icon name={ic} className="mx-auto mb-1 h-5 w-5 text-brand" />
-            <p className="text-2xl font-extrabold">{n}</p>
-            <p className="text-[11px] font-semibold text-mute">{l}</p>
+      <div className="owner-stats grid grid-cols-2 gap-3">
+        {[["Active properties", active, "/owner/listings", "home"], ["Total inquiries", totalInq, "/owner/inquiries", "chat"], ["Upcoming visits", visits, "/owner/inquiries?f=visits", "cal"], ["Awaiting reply", newInq, "/owner/inquiries", "user"]].map(([l, n, h, ic]) => (
+          <Link key={l} href={h} className="premium-card rounded-2xl border border-line bg-white p-5 transition hover:border-brand/40">
+            <Icon name={ic} className="mb-4 h-5 w-5 text-brand" />
+            <p className="text-3xl font-extrabold tracking-tight">{n}</p>
+            <p className="mt-2 text-xs font-semibold text-mute">{l}</p>
           </Link>
         ))}
       </div>
@@ -54,7 +54,7 @@ export default async function Dashboard() {
         </Link>
       )}
 
-      <section className="space-y-3">
+      <div className="dashboard-columns space-y-6 md:space-y-0"><section className="space-y-3">
         <div className="flex items-center justify-between">
           <h2 className="text-[15px] font-extrabold">My properties <Pill tone="soft">{total}</Pill></h2>
           <Link href="/owner/post" className={btn("brand", "!px-3.5 !py-2 text-xs")}><Icon name="plus" className="h-4 w-4" />Add new</Link>
@@ -76,6 +76,7 @@ export default async function Dashboard() {
           {recent.length === 0 ? <p className="py-8 text-center text-sm text-mute">Inquiries from buyers will appear here.</p> : recent.map((i) => <InquiryRow key={i.id} i={i} last={i.messages[0]?.body} />)}
         </Card>
       </section>
+      </div>
 
       {promo && (
         <Card className="flex items-center gap-3 !bg-brand-soft">

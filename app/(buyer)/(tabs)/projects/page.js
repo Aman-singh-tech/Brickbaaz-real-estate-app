@@ -42,7 +42,7 @@ export default async function Projects({ searchParams }) {
         </p>
       </div>
       <Card>
-        <form className="grid grid-cols-2 gap-3">
+        <form className="projects-filter grid grid-cols-2 gap-3">
           <input
             name="q"
             defaultValue={sp.q}
@@ -142,9 +142,9 @@ export default async function Projects({ searchParams }) {
         Compare projects
       </Link>
       {!items.length && <Card>No published projects match these filters.</Card>}
-      {items.map((p) => (
+      <div className="project-grid space-y-4">{items.map((p) => (
         <ProjectCard key={p.id} project={p} />
-      ))}
+      ))}</div>
       {total > limit && (
         <Link
           href={`/projects?${new URLSearchParams({ ...sp, limit: String(limit + 12) })}`}

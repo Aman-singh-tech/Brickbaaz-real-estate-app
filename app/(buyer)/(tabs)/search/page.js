@@ -65,7 +65,7 @@ export default async function SearchPage({ searchParams }) {
           ))}
         </div>
       ) : (
-        <div className="space-y-4">
+        <div className="property-grid space-y-4">
           {items.map((p) => (
             <PropertyCard key={p.id} property={p} saved={saved.has(p.id)} />
           ))}

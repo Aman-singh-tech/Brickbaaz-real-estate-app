@@ -1,16 +1,18 @@
 import Link from "next/link";
 import OwnerTopBar from "@/components/OwnerTopBar";
 import TabBar from "@/components/TabBar";
+import OwnerSidebar from "@/components/OwnerSidebar";
 import { requireOwner } from "@/lib/auth";
 
 export default async function OwnerTabsLayout({ children }) {
   await requireOwner();
   return (
-    <div className="shell">
+    <div className="shell owner-shell">
+      <OwnerSidebar />
       <OwnerTopBar />
       <nav
         aria-label="Inventory and CRM"
-        className="flex gap-2 overflow-x-auto border-b border-line bg-white px-4 py-2 text-xs font-bold"
+        className="owner-mobile-nav flex gap-2 overflow-x-auto border-b border-line bg-white px-4 py-2 text-xs font-bold"
       >
         <Link href="/owner/listings" className="rounded-full bg-fill px-3 py-2">
           Properties
