@@ -63,6 +63,8 @@ export async function submitInterest(_prev, fd) {
     amount = Number(fd.get("amount"));
     if (!Number.isFinite(amount) || amount <= 0 || amount > 1e12)
       return { error: "Enter a valid requested amount." };
+  } else if (type === "OTHER") {
+    interest = "Property assistance";
   } else return { error: "Invalid enquiry type." };
   const existing = await prisma.crmLead.findFirst({
     where: {

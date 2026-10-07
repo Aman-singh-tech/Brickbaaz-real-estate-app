@@ -42,7 +42,9 @@ export default function InterestForm({
             ? "Add a lead"
             : type === "LOAN"
               ? "Request loan assistance"
-              : "I'm interested"}
+              : type === "OTHER"
+                ? "Talk to Brickbaaz"
+                : "I'm interested"}
         </h2>
         <p className="mt-1 text-xs text-mute">
           {manual

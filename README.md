@@ -50,3 +50,13 @@ For integration tests: `npx playwright install chromium`, then `npm run test:pro
 ## Later upgrades
 
 Team accounts/lead assignment, commission accounting, persistent distributed rate limiting, background push/email reminders and market-price analytics are not part of this release. Existing Terms/Privacy content should be reviewed for public project lead collection before promotion.
+
+## Customer homepage and business information
+
+The customer homepage opens directly for first-time visitors with Gurugram as the default. It includes About, live property categories and cards, published builder projects, services, the four-step enquiry/visit process, published customer stories, a guest contact form, and policy links. Drawer section links use native smooth scrolling. Reveal animations and Back to top respect reduced-motion settings; all content remains available without reveal JavaScript.
+
+Homepage contact enquiries require contact consent and create `OTHER` / `Property assistance` leads in the existing owner CRM, with a desk notification and visitor-provided source/campaign attribution. No new database migration is required for this homepage change; previous CRM/testimonial migrations must already be applied.
+
+Default About/service text is included. Optional Render environment variables customize public information: `BRICKBAAZ_ABOUT`, `BRICKBAAZ_OFFICE_ADDRESS`, `BRICKBAAZ_WORKING_HOURS`, `SUPPORT_EMAIL`, `SUPPORT_WHATSAPP` (international number). Calls use a valid `SUPPORT_PHONE`, falling back to the existing public `OWNER_PHONE`. Only configured contact information is displayed. No email/password, private account email, fabricated office details or reviews are shown. Update these values and redeploy to change them. Publish testimonials and properties/projects through the owner app to update inventory and stories.
+
+After `npm run build`, `npm run test:homepage` checks the new homepage against a temporary local database schema, including inventory visibility, guest consent-to-CRM, public contact links, scrolling, mobile/desktop layout and reduced motion. It removes only its own test schema afterward and never seeds production.

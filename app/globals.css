@@ -104,3 +104,82 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-
 @media (prefers-reduced-motion: reduce) {
   * { scroll-behavior: auto !important; animation: none !important; transition: none !important; }
 }
+
+/* Homepage: native scroll, editorial sections, and lightweight interaction. */
+html {
+  scroll-behavior: smooth;
+}
+.home-section {
+  scroll-margin-top: 150px;
+}
+.home-eyebrow {
+  color: var(--color-brand);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  font-weight: 800;
+}
+.home-heading {
+  color: var(--color-navy);
+  font-size: clamp(26px, 3vw, 38px);
+  line-height: 1.2;
+  letter-spacing: -0.025em;
+  font-weight: 800;
+}
+.about-panel {
+  background:
+    radial-gradient(ellipse at top right, #34446a, transparent 70%), #0b1426;
+}
+.about-panel::after {
+  content: "";
+  position: absolute;
+  right: -100px;
+  top: -80px;
+  width: 300px;
+  height: 300px;
+  border: 1px solid rgb(255 255 255 / 0.1);
+  border-radius: 50%;
+  box-shadow:
+    0 0 0 40px rgb(255 255 255 / 0.025),
+    0 0 0 80px rgb(255 255 255 / 0.02);
+}
+.home-service-card {
+  transition:
+    transform 0.25s,
+    box-shadow 0.25s,
+    border-color 0.25s;
+}
+.home-service-card:hover {
+  transform: translateY(-4px);
+  border-color: rgb(224 122 31 / 0.35);
+  box-shadow: 0 16px 36px rgb(11 20 38 / 0.06);
+}
+.customer-shell > header {
+  transition: box-shadow 0.25s;
+}
+.customer-shell > header.header-scrolled {
+  box-shadow: 0 5px 24px rgb(11 20 38 / 0.09);
+}
+.home-footer a:hover {
+  color: #f2bc87;
+}
+@media (max-width: 767px) {
+  .home-scroll-grid {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(0, 88%);
+    gap: 16px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding: 4px 4px 16px;
+  }
+  .home-scroll-grid > * {
+    min-width: 0;
+    margin: 0;
+    scroll-snap-align: start;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}

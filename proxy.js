@@ -36,10 +36,7 @@ export function proxy(request) {
     to.searchParams.set("next", pathname);
     return NextResponse.redirect(to);
   }
-  // first visit: pick a city
-  if (pathname === "/" && !has("city")) {
-    return NextResponse.redirect(new URL("/welcome", request.url));
-  }
+  // Gurugram is the customer default; first-time visitors can explore the homepage directly.
   return NextResponse.next();
 }
 

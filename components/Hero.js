@@ -14,14 +14,27 @@ const hasPhoto = () => {
 
 const TOWERS = [
   // x, width, height, shade
-  [0, 34, 92, "#14213d"], [30, 40, 132, "#1a2a4d"], [68, 30, 78, "#14213d"], [96, 46, 158, "#22345c"],
-  [140, 34, 104, "#1a2a4d"], [172, 42, 142, "#14213d"], [212, 30, 86, "#22345c"], [240, 48, 170, "#1a2a4d"],
-  [286, 34, 110, "#14213d"], [318, 44, 136, "#22345c"], [360, 32, 90, "#1a2a4d"],
+  [0, 34, 92, "#14213d"],
+  [30, 40, 132, "#1a2a4d"],
+  [68, 30, 78, "#14213d"],
+  [96, 46, 158, "#22345c"],
+  [140, 34, 104, "#1a2a4d"],
+  [172, 42, 142, "#14213d"],
+  [212, 30, 86, "#22345c"],
+  [240, 48, 170, "#1a2a4d"],
+  [286, 34, 110, "#14213d"],
+  [318, 44, 136, "#22345c"],
+  [360, 32, 90, "#1a2a4d"],
 ];
 
 function Skyline() {
   return (
-    <svg viewBox="0 0 400 220" preserveAspectRatio="xMidYMax slice" className="absolute inset-0 h-full w-full" aria-hidden="true">
+    <svg
+      viewBox="0 0 400 220"
+      preserveAspectRatio="xMidYMax slice"
+      className="absolute inset-0 h-full w-full"
+      aria-hidden="true"
+    >
       <defs>
         <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0" stopColor="#0b1426" />
@@ -38,8 +51,19 @@ function Skyline() {
           {Array.from({ length: Math.floor((h - 14) / 14) }).map((_, r) =>
             Array.from({ length: Math.floor((w - 8) / 10) }).map((__, k) => {
               const lit = (i * 7 + r * 3 + k * 5) % 4 === 0;
-              return <rect key={`${r}-${k}`} x={x + 6 + k * 10} y={220 - h + 8 + r * 14} width="4.5" height="7" rx="1" fill={lit ? "#f3a254" : "#ffffff"} opacity={lit ? 0.95 : 0.1} />;
-            })
+              return (
+                <rect
+                  key={`${r}-${k}`}
+                  x={x + 6 + k * 10}
+                  y={220 - h + 8 + r * 14}
+                  width="4.5"
+                  height="7"
+                  rx="1"
+                  fill={lit ? "#f3a254" : "#ffffff"}
+                  opacity={lit ? 0.95 : 0.1}
+                />
+              );
+            }),
           )}
         </g>
       ))}
@@ -53,16 +77,34 @@ export default function Hero() {
     <section className="relative -mx-4 -mt-6 h-[400px] overflow-hidden bg-navy md:mx-0 md:mt-0 md:h-[500px] md:rounded-[32px]">
       {photo ? (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src="/hero.jpg" alt="" className="absolute inset-0 h-full w-full object-cover object-[50%_62%]" fetchPriority="high" />
+        <img
+          src="/hero.jpg"
+          alt=""
+          className="absolute inset-0 h-full w-full object-cover object-[50%_62%]"
+          fetchPriority="high"
+        />
       ) : (
         <Skyline />
       )}
       <div className="absolute inset-0 bg-gradient-to-r from-navy/90 via-navy/55 to-navy/20" />
       <div className="relative flex h-full max-w-3xl flex-col justify-center gap-5 px-6 pb-14 md:px-14 md:pb-20">
-        <Pill tone="brand" className="self-start !px-3 !py-1.5 tracking-wider">GURUGRAM · ZERO BROKERAGE</Pill>
-        <h1 className="text-[38px] font-extrabold leading-[1.08] tracking-tight text-white md:text-[64px]">A better address.<br /><span className="text-[#f2bc87]">A new beginning.</span></h1>
-        <p className="max-w-md text-sm leading-relaxed text-white/80 md:text-base">Discover homes and builder projects in Gurugram. Connect directly, explore freely, and find your place.</p>
-        <div className="flex gap-5 text-[11px] font-semibold text-white/75 md:text-sm"><span>Zero brokerage</span><span>Direct owner desk</span><span>Site visits</span></div>
+        <Pill tone="brand" className="self-start !px-3 !py-1.5 tracking-wider">
+          YOUR NEXT MOVE · GURUGRAM
+        </Pill>
+        <h1 className="text-[38px] font-extrabold leading-[1.08] tracking-tight text-white md:text-[64px]">
+          A better address.
+          <br />
+          <span className="text-[#f2bc87]">A new beginning.</span>
+        </h1>
+        <p className="max-w-md text-sm leading-relaxed text-white/80 md:text-base">
+          Discover homes and builder projects in Gurugram. Connect directly,
+          explore freely, and find your place.
+        </p>
+        <div className="flex gap-5 text-[11px] font-semibold text-white/75 md:text-sm">
+          <span>Buy &amp; rent</span>
+          <span>Builder projects</span>
+          <span>Site visits</span>
+        </div>
       </div>
     </section>
   );
