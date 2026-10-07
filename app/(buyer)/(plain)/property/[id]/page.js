@@ -11,6 +11,7 @@ import InterestForm from "@/components/InterestForm";
 import { Card, Icon, Pill, SectionTitle } from "@/components/ui";
 import { getProperty } from "@/lib/properties";
 import { prisma } from "@/lib/prisma";
+import { businessInfo } from "@/lib/business";
 import { getBuyer, getOwner } from "@/lib/auth";
 import {
   emi,
@@ -66,9 +67,7 @@ export default async function PropertyPage({ params, searchParams }) {
         where: { userId_propertyId: { userId: user.id, propertyId: pid } },
       }))
     : false;
-  const deskPhone = String(process.env.OWNER_PHONE ?? "")
-    .replace(/\D/g, "")
-    .slice(-10);
+  const deskPhone = businessInfo().phone.number.slice(-10);
   const unavailable = p.status === "RENTED" || p.status === "SOLD";
   const sq = perSqft(p);
   const monthly =

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getBuyer } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { businessInfo } from "@/lib/business";
 import { buyerLogout } from "@/app/actions/auth";
 import ProfileName from "@/components/ProfileName";
 import { ResendVerification } from "@/components/AuthForms";
@@ -39,7 +40,7 @@ export default async function Profile() {
     prisma.inquiry.count({ where: { userId: user.id, kind: "VISIT", visitAt: { gte: new Date() } } }),
     prisma.notification.count({ where: { userId: user.id, read: false } }),
   ]);
-  const support = process.env.SUPPORT_PHONE || "1800-BRICK-IN";
+  const support = businessInfo().phone;
 
   return (
     <div className="space-y-4 px-4 pb-8 pt-4">
@@ -63,7 +64,7 @@ export default async function Profile() {
         <Row href="/inquiries" icon="chat" title="My inquiries & visits" sub={`${open} inquiries · ${visits} upcoming visits`} />
         <Row href="/saved" icon="heart" title="Saved properties" />
         <Row href="/notifications" icon="bell" title="Notifications" sub={unread ? `${unread} unread` : "All caught up"} />
-        <Row href={`tel:${support.replace(/[^\d+]/g, "") || "1800"}`} icon="phone" title="Help & support" sub={`Call ${support}`} />
+        <Row href={`tel:+${support.number}`} icon="phone" title="Help & support" sub={`Call ${support.label}`} />
         <Row href="/terms" icon="shield" title="Terms of Service" />
         <Row href="/privacy" icon="shield" title="Privacy Policy" />
       </Card>
