@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { cookies } from "next/headers";
 import { Logo, Icon } from "@/components/ui";
+import CustomerNavigation from "@/components/CustomerNavigation";
 import PurposeToggle from "@/components/PurposeToggle";
 import { getBuyer } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
@@ -24,6 +25,7 @@ export default async function TopBar() {
     : 0;
   return (
     <header className="sticky top-0 z-30 flex items-center gap-1 border-b border-line bg-white/95 px-3 py-2.5 backdrop-blur">
+      <CustomerNavigation />
       <Link href="/" aria-label="Brickbaaz home">
         <Logo size="text-[14px]" />
       </Link>
