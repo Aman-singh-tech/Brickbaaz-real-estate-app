@@ -10,7 +10,7 @@ import { Card, Icon, Logo, SectionTitle, btn } from "@/components/ui";
 import { prisma } from "@/lib/prisma";
 import { projectInclude } from "@/lib/projects";
 import { businessInfo } from "@/lib/business";
-import { TYPE_LABEL, cityLabel } from "@/lib/format";
+import { TYPE_LABEL, cityLabel, imgUrl } from "@/lib/format";
 import { CUSTOMER_CITIES, cityWhere } from "@/lib/city";
 import { categoryCounts, featured, savedIds } from "@/lib/properties";
 import { getBuyer } from "@/lib/auth";
@@ -118,7 +118,18 @@ export default async function Explore({ searchParams }) {
   const business = businessInfo();
   return (
     <HomeMotion>
-      <Hero />
+      <Hero
+        photos={items
+          .flatMap((property) => {
+            const photo = property.media.find(
+              (media) => media.kind === "IMAGE",
+            );
+            return photo
+              ? [{ url: imgUrl(photo.url, 1600), title: property.title }]
+              : [];
+          })
+          .slice(0, 2)}
+      />
       <Card
         className="home-search relative z-10 space-y-4 !rounded-3xl !p-5 shadow-xl md:!p-7"
         style={{ marginTop: -56 }}

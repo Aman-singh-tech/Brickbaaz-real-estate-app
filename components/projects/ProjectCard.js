@@ -7,13 +7,14 @@ export default function ProjectCard({ project: p }) {
   const photo = p.assets.find((a) => a.kind === "IMAGE"),
     price = priceOf(p);
   return (
-    <Card className="overflow-hidden !p-0">
+    <Card className="project-card overflow-hidden !p-0">
       <Link href={`/projects/${p.slug}`}>
         {photo ? (
           <img
             src={imgUrl(photo.url, 800)}
             alt={p.name}
             className="h-48 w-full object-cover"
+            loading="lazy"
           />
         ) : (
           <div className="grid h-40 place-items-center bg-fill text-mute">

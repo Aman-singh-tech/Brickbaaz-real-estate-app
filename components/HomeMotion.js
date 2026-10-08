@@ -14,17 +14,31 @@ export default function HomeMotion({ children }) {
           if (!entry.isIntersecting) continue;
           observer.unobserve(entry.target);
           if (reduced.matches) continue;
-          const animation = entry.target.animate(
-            [
-              { opacity: 0.35, transform: "translateY(20px)" },
-              { opacity: 1, transform: "translateY(0)" },
-            ],
-            { duration: 550, easing: "cubic-bezier(.2,.65,.3,1)" },
+          const cards = Array.from(
+            entry.target.querySelectorAll(
+              ".property-grid > *, .project-grid > *, .category-grid > *, .home-service-card, .about-panel",
+            ),
           );
-          animations.add(animation);
-          animation.finished
-            .then(() => animations.delete(animation))
-            .catch(() => {});
+          const targets = cards.length
+            ? [entry.target, ...new Set(cards)]
+            : [entry.target];
+          targets.forEach((target, index) => {
+            const animation = target.animate(
+              [
+                { opacity: 0.35, transform: "translateY(20px)" },
+                { opacity: 1, transform: "translateY(0)" },
+              ],
+              {
+                duration: 650,
+                delay: Math.min(index * 85, 340),
+                easing: "cubic-bezier(.2,.65,.3,1)",
+              },
+            );
+            animations.add(animation);
+            animation.finished
+              .then(() => animations.delete(animation))
+              .catch(() => animations.delete(animation));
+          });
         }
       },
       { threshold: 0.08 },

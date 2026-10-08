@@ -58,7 +58,7 @@ try {
       ...base,
       title: "Homepage featured home",
       featured: true,
-      media: { create: { kind: "IMAGE", url: "/hero.jpg" } },
+      media: { create: { kind: "IMAGE", url: "/hero.jpg?listing=1" } },
     },
   });
   await db.property.create({
@@ -117,6 +117,13 @@ try {
   });
   page.on("pageerror", (e) => errors.push(e.message));
   await page.goto(url + "/?utm_source=homepage-test&utm_campaign=launch");
+  const gallery = page.getByRole("group", { name: "Hero photo controls" });
+  await expect(gallery).toBeVisible();
+  await gallery.getByRole("button", { name: "Pause hero slideshow" }).click();
+  await expect(gallery.getByRole("button", { name: "Play hero slideshow" })).toBeVisible();
+  const secondPhoto = gallery.getByRole("button", { name: /^Show photo 2:/ });
+  await secondPhoto.click();
+  await expect(secondPhoto).toHaveAttribute("aria-pressed", "true");
   for (const id of [
     "about",
     "properties",
