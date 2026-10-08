@@ -1,3 +1,4 @@
+import BankingPartners from "@/components/BankingPartners";
 import Link from "next/link";
 import { getPurpose, getCity } from "@/components/TopBar";
 import PropertyCard from "@/components/PropertyCard";
@@ -393,6 +394,8 @@ export default async function Explore({ searchParams }) {
           approval are determined by the lending provider.
         </p>
       </section>
+
+      <BankingPartners />
 
       <section
         id="how-it-works"

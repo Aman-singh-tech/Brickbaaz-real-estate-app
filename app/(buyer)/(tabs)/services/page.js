@@ -1,3 +1,4 @@
+import BankingPartners from "@/components/BankingPartners";
 import Link from "next/link";
 import InterestForm from "@/components/InterestForm";
 import { LOANS } from "@/lib/crm-options";
@@ -20,6 +21,8 @@ export default async function Services({ searchParams }) {
           Tell us what you need and our team will connect with you.
         </p>
       </section>
+      <BankingPartners />
+
       <div className="grid gap-6 lg:grid-cols-[1.2fr_1fr]">
         <section className="grid content-start gap-3 sm:grid-cols-2">
           {LOANS.map((l) => (
