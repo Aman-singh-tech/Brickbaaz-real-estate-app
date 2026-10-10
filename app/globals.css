@@ -2,6 +2,10 @@
 
 @import "leaflet/dist/leaflet.css";
 
+@media (min-width: 1024px) {
+  .customer-shell .category-grid { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+}
+
 @theme inline {
   --color-navy: #0b1426;
   --color-brand: #e07a1f;
@@ -70,7 +74,7 @@ input[type="file"] { width: 100%; max-width: 100%; font-size: 13px; }
   .home-search form > div:first-child { grid-column: 1 / -1; width: 320px; }
   .home-search form > * { margin-block: 0; }
   .home-search form > button { min-height: 48px; }
-  .category-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 16px; }
+  .category-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
   .property-grid, .project-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; }
   .property-grid > *, .project-grid > * { margin: 0; min-width: 0; }
   .customer-shell .main-tabs { position: static; margin-top: 40px; padding: 20px; background: transparent; }

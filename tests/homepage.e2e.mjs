@@ -65,6 +65,9 @@ try {
     data: { ...base, title: "Private draft", status: "DRAFT" },
   });
   await db.property.create({
+    data: { ...base, title: "Gurugram farm retreat", type: "FARM_HOUSE" },
+  });
+  await db.property.create({
     data: { ...base, title: "Other city home", city: "Delhi" },
   });
   await db.project.create({
@@ -116,6 +119,13 @@ try {
     viewport: { width: 1440, height: 960 },
   });
   page.on("pageerror", (e) => errors.push(e.message));
+  await page.goto(url + "/?utm_source=homepage-test&utm_campaign=launch");
+  const farmCard = page.locator('.category-grid a').filter({ hasText: 'Farm House' });
+  await expect(farmCard).toContainText('1 listings');
+  await farmCard.click();
+  await expect(page).toHaveURL(/type=FARM_HOUSE/);
+  await expect(page.getByText('Gurugram farm retreat', { exact: true })).toBeVisible();
+  await expect(page.getByText('Homepage featured home', { exact: true })).toHaveCount(0);
   await page.goto(url + "/?utm_source=homepage-test&utm_campaign=launch");
   const heroVideo = page.locator('.home-hero video');
   await expect(heroVideo).toBeVisible();

@@ -7,7 +7,7 @@ import { notify } from "@/lib/notify";
 import { stateOf } from "@/lib/format";
 import { isMediaUrl } from "@/lib/media";
 
-const TYPES = ["APARTMENT", "VILLA", "BUILDER_FLOOR", "PLOT", "COMMERCIAL"];
+const TYPES = ["APARTMENT", "VILLA", "BUILDER_FLOOR", "PLOT", "COMMERCIAL", "FARM_HOUSE"];
 const int = (v, max = 2_000_000_000) => {
   if (v === "" || v == null) return null;
   const n = Math.round(Number(v));

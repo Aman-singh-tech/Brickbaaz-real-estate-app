@@ -27,6 +27,7 @@ const CATS = [
   ["BUILDER_FLOOR", "list"],
   ["COMMERCIAL", "calc"],
   ["PLOT", "map"],
+  ["FARM_HOUSE", "home"],
 ];
 const SERVICES = [
   [
