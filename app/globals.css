@@ -209,13 +209,14 @@ html {
   .property-card:hover img, .project-card:hover img, .property-card:focus-within img, .project-card:focus-within img, .home-service-card:hover > span { transform: none; }
 }
 
-/* Keep the supplied portrait promo fully visible rather than crop it into a landscape frame. */
-.video-hero { height: 850px; }
-.video-hero > video { top: auto; bottom: 16px; left: 0; width: 100%; height: 460px; object-fit: contain; z-index: 1; }
-.video-hero .hero-copy { height: auto; padding: 28px 24px; }
+/* Full-area promotional video; cover preserves proportions and fills the hero. */
+.video-hero { height: 540px; }
+.video-hero > video { inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; z-index: 0; }
+.video-hero .hero-copy { height: 100%; padding: 28px 24px 110px; }
+.video-hero > .hero-copy { z-index: 1; }
+.video-hero > .bg-gradient-to-r { z-index: 1; }
 @media (min-width: 768px) {
   .video-hero { height: 580px; }
-  .video-hero > video { top: 0; bottom: 0; left: auto; right: 0; width: 44%; height: 100%; }
-  .video-hero .hero-copy { width: 56%; height: 100%; padding: 32px; }
+  .video-hero .hero-copy { width: 65%; height: 100%; padding: 40px 48px 100px; }
   .video-hero .hero-copy h1 { font-size: clamp(38px, 4.3vw, 60px); }
 }
