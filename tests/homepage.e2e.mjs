@@ -120,7 +120,8 @@ try {
   });
   page.on("pageerror", (e) => errors.push(e.message));
   await page.goto(url + "/?utm_source=homepage-test&utm_campaign=launch");
-  await expect(page.locator('h1')).toContainText('in Gurugram.');
+  await expect(page.locator('h1')).toContainText('Properties in Gurugram');
+  await expect(page.locator('.home-hero .hero-copy')).toHaveCount(0);
   assert.equal(new URL(await page.locator('link[rel="canonical"]').getAttribute('href')).href, url + '/');
   await expect(page.locator('meta[property="og:title"]')).toHaveAttribute('content', /Properties in Gurugram/);
   const structured = await page.locator('script[type="application/ld+json"]').textContent();
@@ -248,6 +249,8 @@ try {
   for (const width of [375, 768, 1440]) {
     await page.setViewportSize({ width, height: 960 });
     await page.goto(url);
+    assert.equal(await page.locator('.home-hero video').evaluate(v => getComputedStyle(v).objectFit), 'contain');
+    await page.locator('.home-hero').screenshot({ path: `.tmp-projects/hero-video-${width}.png` });
     for (const id of [
       "about",
       "properties",

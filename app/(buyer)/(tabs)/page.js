@@ -141,6 +141,7 @@ export default async function Explore({ searchParams }) {
         className="home-search relative z-10 space-y-4 !rounded-3xl !p-5 shadow-xl md:!p-7"
         style={{ marginTop: -56 }}
       >
+        <h1 className="text-lg font-extrabold md:text-2xl">Properties in Gurugram</h1>
         <form action="/search" className="space-y-3">
           <div className="grid grid-cols-2 rounded-xl bg-fill p-1 text-center text-[13px] font-bold">
             {[
