@@ -117,13 +117,16 @@ try {
   });
   page.on("pageerror", (e) => errors.push(e.message));
   await page.goto(url + "/?utm_source=homepage-test&utm_campaign=launch");
-  const gallery = page.getByRole("group", { name: "Hero photo controls" });
-  await expect(gallery).toBeVisible();
-  await gallery.getByRole("button", { name: "Pause hero slideshow" }).click();
-  await expect(gallery.getByRole("button", { name: "Play hero slideshow" })).toBeVisible();
-  const secondPhoto = gallery.getByRole("button", { name: /^Show photo 2:/ });
-  await secondPhoto.click();
-  await expect(secondPhoto).toHaveAttribute("aria-pressed", "true");
+  const heroVideo = page.locator('.home-hero video');
+  await expect(heroVideo).toBeVisible();
+  await expect.poll(() => heroVideo.evaluate(v => v.readyState)).toBeGreaterThan(1);
+  assert.equal(await heroVideo.evaluate(v => v.muted && v.loop && v.playsInline), true);
+  await page.getByRole('button', { name: 'Pause promotional video' }).click();
+  await expect(page.getByRole('button', { name: 'Play promotional video' })).toBeVisible();
+  assert.equal(await heroVideo.evaluate(v => v.paused), true);
+  await page.getByRole('button', { name: 'Play promotional video' }).click();
+  await expect.poll(() => heroVideo.evaluate(v => v.paused)).toBe(false);
+  console.log(await heroVideo.evaluate(v => ({ duration: v.duration, width: v.videoWidth, height: v.videoHeight })));
   for (const id of [
     "about",
     "properties",
@@ -256,6 +259,7 @@ try {
   const reduced = await browser.newContext({ reducedMotion: "reduce" });
   const rp = await reduced.newPage();
   await rp.goto(url);
+  assert.equal(await rp.locator('.home-hero video').evaluate(v => v.paused), true);
   await rp.locator("#contact").scrollIntoViewIfNeeded();
   assert.equal(
     await rp.evaluate(

@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { Pill } from "@/components/ui";
 import HeroGallery from "@/components/HeroGallery";
+import HeroVideo from "@/components/HeroVideo";
 
 // Explore hero. Drop a photo at public/hero.jpg (landscape, ~1600px wide) and it is used automatically;
 // until then a drawn city skyline is shown.
@@ -74,6 +75,7 @@ function Skyline() {
 
 export default function Hero({ photos = [] }) {
   const photo = hasPhoto();
+  const hasVideo = fs.existsSync(path.join(process.cwd(), "public", "videos", "brickbaaz-promotional.mp4"));
   const gallery = [
     ...(photo ? [{ url: "/hero.jpg", title: "Brickbaaz" }] : []),
     ...photos,
@@ -83,8 +85,8 @@ export default function Hero({ photos = [] }) {
     )
     .slice(0, 3);
   return (
-    <section className="home-hero relative -mx-4 -mt-6 h-[460px] overflow-hidden bg-navy md:mx-0 md:mt-0 md:h-[540px] md:rounded-[32px]">
-      {gallery.length ? <HeroGallery photos={gallery} /> : <Skyline />}
+    <section className={`${hasVideo ? "video-hero" : ""} home-hero relative -mx-4 -mt-6 h-[460px] overflow-hidden bg-navy md:mx-0 md:mt-0 md:h-[540px] md:rounded-[32px]`}>
+      {hasVideo ? <HeroVideo /> : gallery.length ? <HeroGallery photos={gallery} /> : <Skyline />}
       <div className="absolute inset-0 bg-gradient-to-r from-navy/90 via-navy/55 to-navy/20" />
       <div className="hero-copy relative flex h-full max-w-3xl flex-col justify-center gap-5 px-6 pb-24 md:px-14 md:pb-20">
         <Pill tone="brand" className="self-start !px-3 !py-1.5 tracking-wider">
