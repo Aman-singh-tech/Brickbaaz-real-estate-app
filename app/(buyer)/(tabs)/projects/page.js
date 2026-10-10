@@ -1,5 +1,6 @@
 export const dynamic = "force-dynamic";
 import Link from "next/link";
+import { pageMetadata } from "@/lib/seo";
 import { prisma } from "@/lib/prisma";
 import {
   projectInclude,
@@ -11,7 +12,7 @@ import ProjectMap from "@/components/projects/ProjectMap";
 import { formatInr } from "@/lib/format";
 import ProjectCard from "@/components/projects/ProjectCard";
 import { CUSTOMER_CITIES, DEFAULT_CITY } from "@/lib/city";
-export const metadata = { title: "Builder projects" };
+export const metadata = pageMetadata("Builder Projects in Gurugram", "Explore builder projects in Gurugram. Compare locations, configurations, prices and amenities, and enquire about a site visit with Brickbaaz.", "/projects");
 export default async function Projects({ searchParams }) {
   const sp = { ...(await searchParams), city: DEFAULT_CITY },
     where = projectWhere(sp),

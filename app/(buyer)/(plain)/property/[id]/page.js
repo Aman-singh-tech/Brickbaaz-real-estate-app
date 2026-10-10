@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { pageMetadata } from "@/lib/seo";
 import { notFound } from "next/navigation";
 import { after } from "next/server";
 import BackBar from "@/components/BackBar";
@@ -25,7 +26,13 @@ import {
 export async function generateMetadata({ params }) {
   const { id } = await params;
   const p = Number(id) ? await getProperty(Number(id)) : null;
-  return { title: p?.title ?? "Property" };
+  if (!p || !["ACTIVE", "SOLD", "RENTED"].includes(p.status))
+    return { title: "Property unavailable", robots: { index: false, follow: false } };
+  const description = `${TYPE_LABEL[p.type]} ${p.purpose === "RENT" ? "for rent" : "for sale"} in ${[p.locality, p.city].filter(Boolean).join(", ")}. ${formatPrice(p)}${p.superArea ? ` · ${p.superArea} sq.ft` : ""}. View photos, property details and enquire with Brickbaaz.`;
+  return {
+    ...pageMetadata(p.title, description, `/property/${p.id}`, p.media.find(m => m.kind === "IMAGE")?.url || "/hero.jpg"),
+    ...(p.status !== "ACTIVE" ? { robots: { index: false, follow: true } } : {}),
+  };
 }
 
 function Stat({ label, value, sub }) {

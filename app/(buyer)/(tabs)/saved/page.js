@@ -7,7 +7,7 @@ import { projectInclude } from "@/lib/projects";
 import PropertyCard from "@/components/PropertyCard";
 import { Card, btn } from "@/components/ui";
 
-export const metadata = { title: "Saved" };
+export const metadata = { title: "Saved", robots: { index: false, follow: false } };
 
 export default async function Saved() {
   const user = await getBuyer();

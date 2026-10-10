@@ -1,9 +1,10 @@
 import BankingPartners from "@/components/BankingPartners";
+import { pageMetadata } from "@/lib/seo";
 import Link from "next/link";
 import InterestForm from "@/components/InterestForm";
 import { LOANS } from "@/lib/crm-options";
 import { Card } from "@/components/ui";
-export const metadata = { title: "Loans & Finance" };
+export const metadata = pageMetadata("Home Loan & Finance Assistance", "Request home loan, loan against property and other finance assistance from Brickbaaz. Explore banking partners and submit your loan enquiry.", "/services");
 export default async function Services({ searchParams }) {
   const sp = await searchParams;
   const loan = LOANS.includes(sp.loan) ? sp.loan : LOANS[0];

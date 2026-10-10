@@ -7,7 +7,7 @@ import ProfileName from "@/components/ProfileName";
 import { ResendVerification } from "@/components/AuthForms";
 import { Card, Icon, Pill, btn } from "@/components/ui";
 
-export const metadata = { title: "Profile" };
+export const metadata = { title: "Profile", robots: { index: false, follow: false } };
 
 function Row({ href, icon, title, sub, right }) {
   const body = (

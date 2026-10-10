@@ -1,6 +1,7 @@
 import { Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import SwRegister from "@/components/SwRegister";
+import { siteUrl } from "@/lib/seo";
 
 const jakarta = Plus_Jakarta_Sans({
   variable: "--font-jakarta",
@@ -8,8 +9,9 @@ const jakarta = Plus_Jakarta_Sans({
 });
 
 export const metadata = {
+  metadataBase: new URL(siteUrl),
   title: { default: "Brickbaaz", template: "%s · Brickbaaz" },
-  description: "Search, shortlist and connect with genuine property owners. Zero brokerage.",
+  description: "Explore properties and builder projects in Gurugram with Brickbaaz. Compare details, request site visits and get property or loan assistance.",
   manifest: "/manifest.webmanifest",
   appleWebApp: { capable: true, title: "Brickbaaz", statusBarStyle: "default" },
   icons: { apple: "/icons/apple-touch-icon.png" },

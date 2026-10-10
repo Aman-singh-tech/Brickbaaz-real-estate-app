@@ -93,9 +93,9 @@ export default function Hero({ photos = [] }) {
           YOUR NEXT MOVE · GURUGRAM
         </Pill>
         <h1 className="text-[38px] font-extrabold leading-[1.08] tracking-tight text-white md:text-[64px]">
-          A better address.
+          Find your property
           <br />
-          <span className="text-[#f2bc87]">A new beginning.</span>
+          <span className="text-[#f2bc87]">in Gurugram.</span>
         </h1>
         <p className="max-w-md text-sm leading-relaxed text-white/80 md:text-base">
           Discover homes and builder projects in Gurugram. Connect directly,

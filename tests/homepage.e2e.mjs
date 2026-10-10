@@ -120,6 +120,18 @@ try {
   });
   page.on("pageerror", (e) => errors.push(e.message));
   await page.goto(url + "/?utm_source=homepage-test&utm_campaign=launch");
+  await expect(page.locator('h1')).toContainText('in Gurugram.');
+  assert.equal(new URL(await page.locator('link[rel="canonical"]').getAttribute('href')).href, url + '/');
+  await expect(page.locator('meta[property="og:title"]')).toHaveAttribute('content', /Properties in Gurugram/);
+  const structured = await page.locator('script[type="application/ld+json"]').textContent();
+  assert.equal(JSON.parse(structured)['@graph'][0].name, 'Brickbaaz');
+  const sitemap = await (await fetch(url + '/sitemap.xml')).text();
+  assert.ok(sitemap.includes('/projects/homepage-project'));
+  assert.ok(!sitemap.includes('/owner/'));
+  const robots = await (await fetch(url + '/robots.txt')).text();
+  assert.ok(robots.includes('Sitemap: ' + url + '/sitemap.xml'));
+  await page.locator('#property-faq summary').first().click();
+  await expect(page.locator('#property-faq details').first()).toHaveAttribute('open', '');
   const farmCard = page.locator('.category-grid a').filter({ hasText: 'Farm House' });
   await expect(farmCard).toContainText('1 listings');
   await farmCard.click();

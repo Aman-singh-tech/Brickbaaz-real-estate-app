@@ -12,7 +12,7 @@ import { formatPrice, bhkLabel } from "@/lib/format";
 import { DEFAULT_CITY } from "@/lib/city";
 import { getBuyer } from "@/lib/auth";
 
-export const metadata = { title: "Search properties" };
+export const metadata = { title: "Search properties", robots: { index: false, follow: true } };
 
 export default async function SearchPage({ searchParams }) {
   const sp = await searchParams;

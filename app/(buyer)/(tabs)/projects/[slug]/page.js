@@ -1,6 +1,7 @@
 /* eslint-disable @next/next/no-img-element -- Cloudinary handles image delivery; uploads also support local development URLs. */
 export const dynamic = "force-dynamic";
 import Link from "next/link";
+import { pageMetadata } from "@/lib/seo";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { projectInclude } from "@/lib/projects";
@@ -13,6 +14,13 @@ import InterestForm from "@/components/InterestForm";
 import EmiCalculator from "@/components/EmiCalculator";
 import LeadForm from "@/components/projects/LeadForm";
 import SaveProject from "@/components/projects/SaveProject";
+export async function generateMetadata({ params }) {
+  const { slug } = await params;
+  const project = await prisma.project.findUnique({ where: { slug }, include: projectInclude });
+  if (!project || project.status !== "PUBLISHED")
+    return { title: "Project unavailable", robots: { index: false, follow: false } };
+  return pageMetadata(`${project.name} in ${project.city}`, `Explore ${project.name} by ${project.builder.name} in ${project.locality}, ${project.city}. View configurations, photos and amenities, and request a site visit with Brickbaaz.`, `/projects/${encodeURIComponent(slug)}`, project.assets.find(a => a.kind === "IMAGE")?.url || "/hero.jpg");
+}
 export default async function ProjectDetail({ params, searchParams }) {
   const { slug } = await params,
     sp = await searchParams,

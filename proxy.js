@@ -19,6 +19,7 @@ export function proxy(request) {
 
   if (ownerHost && appUrl) {
     if (host === ownerHost) {
+      if (pathname === "/robots.txt") return NextResponse.next();
       if (pathname === "/") return NextResponse.redirect(new URL("/owner/dashboard", request.url));
       if (!isOwnerPath(pathname) && !pathname.startsWith("/api/")) {
         return NextResponse.redirect(`${appUrl}${pathname}${search}`);

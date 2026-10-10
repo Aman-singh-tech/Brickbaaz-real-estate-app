@@ -1,4 +1,6 @@
 import BankingPartners from "@/components/BankingPartners";
+import { pageMetadata, absoluteUrl } from "@/lib/seo";
+import HomeFaq from "@/components/HomeFaq";
 import Link from "next/link";
 import { getPurpose, getCity } from "@/components/TopBar";
 import PropertyCard from "@/components/PropertyCard";
@@ -16,11 +18,7 @@ import { CUSTOMER_CITIES, cityWhere } from "@/lib/city";
 import { categoryCounts, featured, savedIds } from "@/lib/properties";
 import { getBuyer } from "@/lib/auth";
 
-export const metadata = {
-  title: "Brickbaaz | Homes, projects & property assistance in Gurugram",
-  description:
-    "Explore Gurugram properties and builder projects, request site visits, and connect with Brickbaaz for property and loan assistance.",
-};
+export const metadata = pageMetadata("Properties in Gurugram — Buy, Rent & Builder Projects", "Explore apartments, builder floors, villas, plots and farm houses in Gurugram. Compare property details, request site visits and get loan assistance from Brickbaaz.", "/");
 const CATS = [
   ["APARTMENT", "home"],
   ["VILLA", "home"],
@@ -120,6 +118,13 @@ export default async function Explore({ searchParams }) {
   const business = businessInfo();
   return (
     <HomeMotion>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+        "@context": "https://schema.org",
+        "@graph": [
+          { "@type": "Organization", "@id": absoluteUrl("/#organization"), name: "Brickbaaz", url: absoluteUrl("/"), ...(business.phone ? { telephone: `+${business.phone.number}` } : {}), ...(business.email ? { email: business.email } : {}) },
+          { "@type": "WebSite", "@id": absoluteUrl("/#website"), name: "Brickbaaz", url: absoluteUrl("/"), publisher: { "@id": absoluteUrl("/#organization") } },
+        ],
+      }).replace(/</g, "\\u003c") }} />
       <Hero
         photos={items
           .flatMap((property) => {
@@ -545,6 +550,7 @@ export default async function Explore({ searchParams }) {
         />
       </section>
 
+      <HomeFaq />
       <footer className="home-footer rounded-t-[32px] bg-navy p-6 text-white md:p-10">
         <div className="grid gap-8 md:grid-cols-3">
           <div>
