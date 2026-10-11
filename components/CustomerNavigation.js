@@ -116,6 +116,9 @@ export default function CustomerNavigation() {
           <Link href="/inquiries" onClick={close}>
             My inquiries
           </Link>
+          <Link href="/emi-calculator" onClick={close} aria-current={path === "/emi-calculator" ? "page" : undefined}>
+            Home Loan EMI Calculator
+          </Link>
           <Link
             href="/services"
             onClick={close}

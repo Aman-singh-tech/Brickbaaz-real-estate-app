@@ -10,7 +10,7 @@ export default async function sitemap() {
     prisma.project.findMany({ where: { status: "PUBLISHED", ...cityWhere(DEFAULT_CITY) }, select: { slug: true, updatedAt: true } }),
   ]);
   return [
-    ...["/", "/projects", "/services", "/testimonials", "/privacy", "/terms"].map(path => ({ url: absoluteUrl(path) })),
+    ...["/", "/projects", "/services", "/emi-calculator", "/testimonials", "/privacy", "/terms"].map(path => ({ url: absoluteUrl(path) })),
     ...properties.map(p => ({ url: absoluteUrl(`/property/${p.id}`), lastModified: p.updatedAt })),
     ...projects.map(p => ({ url: absoluteUrl(`/projects/${encodeURIComponent(p.slug)}`), lastModified: p.updatedAt })),
   ];
