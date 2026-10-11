@@ -214,6 +214,7 @@ html {
 }
 
 /* Show the full portrait frame without cropping or placing copy over the logo. */
-.video-hero { height: auto; padding-bottom: 100px; }
-.video-hero > video { position: relative; display: block; width: 100%; height: clamp(480px, 70vh, 720px); object-fit: contain; object-position: center; z-index: 0; }
-.video-hero .hero-video-controls { position: relative; z-index: 1; }
+.home-page .video-hero { width: 100vw; margin-left: calc(50% - 50vw); margin-right: calc(50% - 50vw); border-radius: 0; height: clamp(480px, 78svh, 820px); padding-bottom: 0; }
+.video-hero > .hero-video-background { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; filter: blur(24px) brightness(.65); transform: scale(1.08); pointer-events: none; }
+.video-hero > .hero-video-main { position: relative; display: block; width: 100%; height: 100%; object-fit: contain; object-position: center; z-index: 1; }
+.video-hero .hero-video-controls { position: absolute; right: 20px; bottom: 80px; z-index: 2; border-radius: 999px; padding: 10px 16px; background: rgb(11 20 38 / .75); }

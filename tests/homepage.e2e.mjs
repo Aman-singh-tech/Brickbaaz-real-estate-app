@@ -140,7 +140,7 @@ try {
   await expect(page.getByText('Gurugram farm retreat', { exact: true })).toBeVisible();
   await expect(page.getByText('Homepage featured home', { exact: true })).toHaveCount(0);
   await page.goto(url + "/?utm_source=homepage-test&utm_campaign=launch");
-  const heroVideo = page.locator('.home-hero video');
+  const heroVideo = page.locator('.hero-video-main');
   await expect(heroVideo).toBeVisible();
   await expect.poll(() => heroVideo.evaluate(v => v.readyState)).toBeGreaterThan(1);
   assert.equal(await heroVideo.evaluate(v => v.muted && v.loop && v.playsInline), true);
@@ -249,7 +249,9 @@ try {
   for (const width of [375, 768, 1440]) {
     await page.setViewportSize({ width, height: 960 });
     await page.goto(url);
-    assert.equal(await page.locator('.home-hero video').evaluate(v => getComputedStyle(v).objectFit), 'contain');
+    await expect(page.locator('.video-hero')).toBeVisible();
+    assert.equal(await page.locator('.hero-video-main').evaluate(v => getComputedStyle(v).objectFit), 'contain');
+    assert.ok(Math.abs((await page.locator('.video-hero').boundingBox()).width - width) < 2, `Video banner must fill viewport at ${width}`);
     await page.locator('.home-hero').screenshot({ path: `.tmp-projects/hero-video-${width}.png` });
     for (const id of [
       "about",
@@ -284,7 +286,7 @@ try {
   const reduced = await browser.newContext({ reducedMotion: "reduce" });
   const rp = await reduced.newPage();
   await rp.goto(url);
-  assert.equal(await rp.locator('.home-hero video').evaluate(v => v.paused), true);
+  assert.equal(await rp.locator('.hero-video-main').evaluate(v => v.paused), true);
   await rp.locator("#contact").scrollIntoViewIfNeeded();
   assert.equal(
     await rp.evaluate(
