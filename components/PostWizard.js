@@ -17,7 +17,7 @@ const EMPTY = {
   bedrooms: 2, bathrooms: 2, balconies: 1, carpetArea: "", superArea: "", floor: "", totalFloors: "",
   furnishing: "Semi-Furnished", facing: "", possession: "READY", possessionBy: "", amenities: [],
   nearby: [{ label: "", distance: "" }, { label: "", distance: "" }, { label: "", distance: "" }],
-  description: "", reraId: "", price: "", negotiable: false, deposit: "", media: [], confirmed: false,
+  description: "", builderRemarks: "", reraId: "", price: "", negotiable: false, deposit: "", media: [], confirmed: false,
 };
 
 function Chip({ on, children, ...p }) {
@@ -353,6 +353,10 @@ export default function PostWizard({ initial, id: initialId }) {
                 <textarea value={d.description} onChange={(e) => set("description", e.target.value)} rows={5} maxLength={3000} placeholder="Describe the home: layout, view, flooring, kitchen, what is nearby…" className={inputCls} />
               </label>
               <label><Label>RERA ID (optional)</Label><input value={d.reraId} onChange={(e) => set("reraId", e.target.value)} maxLength={40} className={inputCls} /></label>
+              <label><Label>Private Builder Details / Remarks</Label>
+                <textarea value={d.builderRemarks} onChange={(e) => set("builderRemarks", e.target.value)} rows={4} maxLength={3000} placeholder="Builder name, contact number and private notes about whose property this is…" className={inputCls} />
+              </label>
+              <p className="text-xs leading-6 text-mute">Only visible in your owner app. These remarks are not part of the public property description.</p>
             </Card>
           </>
         )}

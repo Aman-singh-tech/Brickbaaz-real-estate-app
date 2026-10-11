@@ -146,7 +146,14 @@ model Property {
   inquiries     Inquiry[]
   saved         Saved[]
 
+  privateDetails PropertyPrivateDetails?
   @@index([status, purpose, city])
+}
+
+model PropertyPrivateDetails {
+  propertyId Int @id
+  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  remarks String
 }
 
 model Media {

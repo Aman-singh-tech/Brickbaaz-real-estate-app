@@ -122,6 +122,13 @@ export async function saveProperty(id, data, publish) {
           data: { ...fields, ownerId: owner.id, status, publishedAt },
         });
     await tx.media.deleteMany({ where: { propertyId: p.id } });
+    if (Object.hasOwn(data, "builderRemarks")) {
+      const remarks = str(data.builderRemarks, 3000);
+      if (remarks) await tx.propertyPrivateDetails.upsert({
+        where: { propertyId: p.id }, create: { propertyId: p.id, remarks }, update: { remarks },
+      });
+      else await tx.propertyPrivateDetails.deleteMany({ where: { propertyId: p.id } });
+    }
     if (media.length)
       await tx.media.createMany({
         data: media.map((m, i) => ({

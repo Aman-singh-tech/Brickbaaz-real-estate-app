@@ -75,6 +75,10 @@ export default function OwnerPropertyCard({ p, inquiries }) {
           <Link href="/owner/inquiries"><Pill tone="soft"><Icon name="chat" className="mr-1 h-3 w-3" />{inquiries} {inquiries === 1 ? "inquiry" : "inquiries"}</Pill></Link>
         </div>
       </div>
+      {p.privateDetails?.remarks && <details className="rounded-xl border border-line bg-fill p-3">
+        <summary className="cursor-pointer text-xs font-bold">Private Builder Details / Remarks</summary>
+        <p className="mt-2 whitespace-pre-wrap break-words text-sm">{p.privateDetails.remarks}</p>
+      </details>}
       <div className="flex gap-2">
         <Link href={`/owner/post?edit=${p.id}`} className={btn("primary", "flex-1")}><Icon name="edit" className="h-4 w-4" />{p.status === "DRAFT" ? "Continue" : "Edit"}</Link>
         {p.status === "ACTIVE" ? (

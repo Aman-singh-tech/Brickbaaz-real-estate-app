@@ -11,7 +11,7 @@ export default async function PostPage({ searchParams }) {
   let initial = null;
   let id = null;
   if (edit) {
-    const p = await prisma.property.findUnique({ where: { id: Number(edit) || 0 }, include: { media: { orderBy: { sort: "asc" } } } });
+    const p = await prisma.property.findUnique({ where: { id: Number(edit) || 0 }, include: { privateDetails: true, media: { orderBy: { sort: "asc" } } } });
     if (!p || p.ownerId !== owner.id) notFound();
     id = p.id;
     const nearby = Array.isArray(p.nearby) ? p.nearby : [];
@@ -21,7 +21,7 @@ export default async function PostPage({ searchParams }) {
       carpetArea: p.carpetArea ?? "", superArea: p.superArea ?? "", floor: p.floor ?? "", totalFloors: p.totalFloors ?? "",
       furnishing: p.furnishing ?? "", facing: p.facing ?? "", possession: p.possession ?? "READY", possessionBy: p.possessionBy ?? "",
       amenities: p.amenities, nearby: [0, 1, 2].map((i) => nearby[i] ?? { label: "", distance: "" }),
-      description: p.description ?? "", reraId: p.reraId ?? "", price: p.price || "", negotiable: p.negotiable, deposit: p.deposit ?? "",
+      builderRemarks: p.privateDetails?.remarks ?? "", description: p.description ?? "", reraId: p.reraId ?? "", price: p.price || "", negotiable: p.negotiable, deposit: p.deposit ?? "",
       media: p.media.map((m) => ({ url: m.url, kind: m.kind })), confirmed: p.status !== "DRAFT",
     };
   }
