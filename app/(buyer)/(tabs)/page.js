@@ -1,6 +1,7 @@
 import BankingPartners from "@/components/BankingPartners";
 import { pageMetadata, absoluteUrl } from "@/lib/seo";
 import HomeFaq from "@/components/HomeFaq";
+import HomeLoanCalculator from "@/components/HomeLoanCalculator";
 import Link from "next/link";
 import { getPurpose, getCity } from "@/components/TopBar";
 import PropertyCard from "@/components/PropertyCard";
@@ -345,6 +346,15 @@ export default async function Explore({ searchParams }) {
         <Link href={`/search?p=${purpose}`} className={btn("soft")}>
           See all properties <span aria-hidden="true">→</span>
         </Link>
+      </section>
+
+      <section id="home-loan-emi" data-reveal className="home-section space-y-6" aria-labelledby="home-loan-title">
+        <div className="space-y-3">
+          <p className="home-eyebrow">PLAN YOUR HOME LOAN</p>
+          <h2 id="home-loan-title" className="home-heading">Home Loan EMI Calculator</h2>
+          <p className="text-sm leading-7 text-mute">Estimate your monthly repayments using your loan amount, interest rate and tenure.</p>
+        </div>
+        <HomeLoanCalculator />
       </section>
 
       <section id="projects" data-reveal className="home-section space-y-6">
