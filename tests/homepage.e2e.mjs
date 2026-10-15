@@ -120,8 +120,8 @@ try {
   });
   page.on("pageerror", (e) => errors.push(e.message));
   await page.goto(url + "/?utm_source=homepage-test&utm_campaign=launch");
-  await expect(page.locator('h1')).toContainText('Properties in Gurugram');
-  await expect(page.locator('.home-hero .hero-copy')).toHaveCount(0);
+  await expect(page.locator('h1')).toContainText('Find your next address');
+  await expect(page.locator('.home-hero .hero-copy')).toHaveCount(1);
   assert.equal(new URL(await page.locator('link[rel="canonical"]').getAttribute('href')).href, url + '/');
   await expect(page.locator('meta[property="og:title"]')).toHaveAttribute('content', /Properties in Gurugram/);
   const structured = await page.locator('script[type="application/ld+json"]').textContent();
@@ -139,7 +139,10 @@ try {
   await page.screenshot({ path: '.tmp-projects/brickbaaz-night-effects.png' });
   await page.getByLabel('Appearance', { exact: true }).selectOption('light');
   await expect(page.locator('.customer-experience')).toHaveAttribute('data-theme', 'light');
-
+  const calculator = page.locator('#home-loan-emi');
+  await calculator.getByRole('button', { name: 'Calculate EMI', exact: true }).click();
+  await expect(calculator.getByText('₹48,915', { exact: true })).toBeVisible();
+  assert.ok(await page.evaluate(() => Boolean(document.querySelector('#home-loan-emi').compareDocumentPosition(document.querySelector('#projects')) & Node.DOCUMENT_POSITION_FOLLOWING)));
   assert.equal(JSON.parse(structured)['@graph'][0].name, 'Brickbaaz');
   const sitemap = await (await fetch(url + '/sitemap.xml')).text();
   assert.ok(sitemap.includes('/projects/homepage-project'));
@@ -155,6 +158,16 @@ try {
   await expect(page.getByText('Gurugram farm retreat', { exact: true })).toBeVisible();
   await expect(page.getByText('Homepage featured home', { exact: true })).toHaveCount(0);
   await page.goto(url + "/?utm_source=homepage-test&utm_campaign=launch");
+  await page.getByText('Rent Homes', { exact: true }).click();
+  await expect(page.getByLabel('Maximum budget')).toContainText('₹25,000 / month');
+  await page.getByText('Buy Properties', { exact: true }).click();
+  await page.getByLabel('Property type', { exact: true }).selectOption('BUILDER_FLOOR');
+  await page.getByLabel('Maximum budget').selectOption('30000000');
+  await page.getByRole('button', { name: 'Search Properties', exact: true }).click();
+  await expect(page).toHaveURL(/type=BUILDER_FLOOR/);
+  assert.equal(new URL(page.url()).searchParams.get('max'), '30000000');
+  await expect(page.getByText('Homepage featured home', { exact: true })).toBeVisible();
+  await page.goto(url + '/?utm_source=homepage-test&utm_campaign=launch');
   const heroVideo = page.locator('.hero-video-main');
   await expect(heroVideo).toBeVisible();
   await expect.poll(() => heroVideo.evaluate(v => v.readyState)).toBeGreaterThan(1);
@@ -261,12 +274,12 @@ try {
   await page.getByRole("button", { name: "Back to top" }).click();
   await expect.poll(() => page.evaluate(() => window.scrollY)).toBeLessThan(5);
   await fs.mkdir(".tmp-projects", { recursive: true });
-  for (const width of [375, 768, 1440]) {
+  for (const width of [375, 768, 1024, 1280, 1440]) {
     await page.setViewportSize({ width, height: 960 });
     await page.goto(url);
-    await expect(page.locator('.video-hero')).toBeVisible();
+    await expect(page.locator('.discovery-film')).toBeVisible();
     assert.equal(await page.locator('.hero-video-main').evaluate(v => getComputedStyle(v).objectFit), 'contain');
-    assert.ok(Math.abs((await page.locator('.video-hero').boundingBox()).width - width) < 2, `Video banner must fill viewport at ${width}`);
+    await expect(page.locator('.discovery-film .hero-video-main')).toBeVisible();
     await page.locator('.home-hero').screenshot({ path: `.tmp-projects/hero-video-${width}.png` });
     for (const id of [
       "about",
@@ -297,6 +310,7 @@ try {
       path: `.tmp-projects/homepage-${width}.png`,
       fullPage: true,
     });
+    await page.screenshot({ path: `.tmp-projects/homepage-top-${width}.png` });
   }
   const reduced = await browser.newContext({ reducedMotion: "reduce" });
   const rp = await reduced.newPage();
@@ -318,9 +332,7 @@ try {
   await expect(rp.getByText("Published customer", { exact: true })).toHaveCount(
     0,
   );
-  await expect(
-    rp.getByText("Your experience matters.", { exact: true }),
-  ).toBeVisible();
+  await expect(rp.locator('#experiences')).toHaveCount(0);
   assert.deepEqual(errors, []);
   console.log(
     "PASS: homepage sections, live inventory/city/draft visibility, published stories/video, configurable contact, consent-to-CRM/notification/UTM, section anchors/back-to-top, responsive layouts and reduced motion.",

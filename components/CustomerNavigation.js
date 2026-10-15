@@ -138,10 +138,8 @@ export default function CustomerNavigation() {
           {[
             ["About Brickbaaz", "about"],
             ["Featured properties", "properties"],
-            ["Builder projects", "projects"],
             ["Our services", "our-services"],
             ["How it works", "how-it-works"],
-            ["Customer experiences", "experiences"],
             ["Contact & support", "contact"],
           ].map(([label, id]) => (
             <Link

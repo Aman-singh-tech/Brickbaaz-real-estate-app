@@ -237,6 +237,27 @@ html {
 .video-hero > .hero-video-main { position: relative; display: block; width: 100%; height: 100%; object-fit: contain; object-position: center; z-index: 1; }
 .video-hero .hero-video-controls { position: absolute; right: 20px; bottom: 80px; z-index: 2; border-radius: 999px; padding: 10px 16px; background: rgb(11 20 38 / .75); }
 
+/* Modern luxury preview: property photography, warm surfaces and quiet bronze details. */
+.luxury-navigation { display:none; }
+.home-hero:not(.video-hero) { height:560px; border-radius:4px; }
+.home-hero .hero-copy h1 { font-family:Georgia,serif; font-weight:400; letter-spacing:-.035em; }
+.home-heading { font-family:Georgia,serif; font-weight:400; }
+.home-search { border-radius:12px!important; box-shadow:0 18px 50px rgb(32 38 33 / .08); }
+.home-section { margin-top:56px; }
+.property-card, .project-card { border-radius:12px; overflow:hidden; }
+.brand-film { height:580px; }
+.brand-film > .hero-video-background { display:none; }
+.brand-film > .hero-video-main { position:relative; width:100%; height:100%; object-fit:contain; }
+.brand-film .hero-video-controls { position:absolute; inset:auto 0 0; z-index:2; }
+@media(min-width:1100px) {
+.luxury-navigation { display:flex; align-items:center; gap:24px; font-size:12px; font-weight:600; margin-right:24px; }
+.luxury-navigation a:hover { color:var(--color-brand); }
+.customer-shell > header { min-height:80px; }
+.home-hero:not(.video-hero) { height:600px; }
+.home-section { margin-top:64px; }
+}
+@media(max-width:767px) { .home-hero:not(.video-hero) {height:490px;} .hero-copy h1 {font-size:40px;} .brand-film {height:530px;} }
+
 /* Landscape tour: preserve the full frame on every screen without blurred filler. */
 .home-page .video-hero, .home-page .brand-film { height:auto; min-height:0; padding:0; }
 .video-hero > .hero-video-main, .brand-film > .hero-video-main { display:block; width:100%; height:auto; aspect-ratio:16 / 9; object-fit:contain; }
@@ -280,3 +301,34 @@ html {
 .customer-experience .bg-brand-soft { background-color:var(--color-brand-soft); }
 .customer-experience .bg-brand { background-color:var(--color-brand); }
 .customer-experience .border-line { border-color:var(--color-line); }
+
+/* Customer discovery: concise desktop navigation, search and authentic inventory. */
+.customer-experience .discovery-hero { height:auto; min-height:0; margin:0; display:grid; grid-template-columns:minmax(0,1fr); border-radius:20px; overflow:hidden; background:#182323; }
+.discovery-hero .hero-copy { width:auto; max-width:none; height:auto; padding:32px 28px; gap:20px; display:flex; flex-direction:column; justify-content:center; }
+.discovery-hero .hero-copy h1 { font-family:Georgia,serif; font-size:clamp(32px,3.6vw,50px); line-height:1.12; color:white; font-weight:400; }
+.discovery-hero .hero-copy h1 span { color:#e0b589; }
+.discovery-film { position:relative; align-self:center; background:#0b1426; min-width:0; }
+.discovery-film > .hero-video-main { position:relative; display:block; width:100%; height:auto; aspect-ratio:16 / 9; object-fit:contain; }
+.discovery-film .hero-video-controls { position:relative; padding:10px; z-index:1; }
+.customer-experience .home-search { max-width:none; margin-top:20px!important; border-radius:16px!important; box-shadow:0 8px 30px rgb(15 25 20 / .06); }
+.customer-experience .home-page { padding-top:24px; }
+.customer-experience .home-page > :where(section,footer) { margin-top:44px; }
+.customer-experience .home-page > .discovery-hero { margin-top:0; }
+.about-brief { border-block:1px solid var(--color-line); padding-block:28px; }
+.customer-experience .property-card { display:flex; flex-direction:column; border-radius:18px; }
+.customer-experience .property-card > div:last-child { flex:1; }
+@media(min-width:1024px) {
+.customer-experience .discovery-hero { grid-template-columns:minmax(0,1fr) minmax(0,1.1fr); }
+.discovery-hero .hero-copy { padding:34px; }
+.customer-experience .home-search form { grid-template-columns:150px minmax(150px,1fr) 165px 150px 175px; gap:12px; }
+.customer-experience .home-search form > div:first-child { grid-column:1 / -1; width:380px; }
+.customer-experience .home-search form button { white-space:nowrap; }
+.customer-experience .home-page > :where(section,footer) { margin-top:48px; }
+}
+@media(min-width:1100px) { .luxury-navigation { gap:18px; font-size:13px; margin-right:14px; } }
+@media(min-width:1100px) and (max-width:1279px) { .luxury-navigation > a[href^='tel:'] {display:none;} }
+@media(max-width:767px) { .discovery-hero .hero-copy { padding:28px 22px; } }
+
+.customer-experience > .shell:has(.property-detail) { max-width:1280px; width:100%; box-shadow:none; }
+.property-detail { width:100%; }
+.property-detail > header { padding-inline:16px; }

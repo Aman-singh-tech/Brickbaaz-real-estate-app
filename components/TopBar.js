@@ -7,6 +7,7 @@ import PurposeToggle from "@/components/PurposeToggle";
 import { getBuyer } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { DEFAULT_CITY } from "@/lib/city";
+import { businessInfo } from "@/lib/business";
 
 export async function getPurpose() {
   return (await cookies()).get("purpose")?.value === "rent" ? "rent" : "sale";
@@ -24,13 +25,22 @@ export default async function TopBar() {
         where: { userId: user.id, read: false },
       })
     : 0;
+  const business = businessInfo();
   return (
     <header className="sticky top-0 z-30 flex items-center gap-1 border-b border-line bg-white/95 px-3 py-2.5 backdrop-blur">
       <CustomerNavigation />
       <Link href="/" aria-label="Brickbaaz home">
-        <Logo size="text-[14px]" />
+        <Logo size="text-base lg:text-xl" />
       </Link>
       <span className="flex-1" />
+      <nav aria-label="Main navigation" className="luxury-navigation">
+        <Link href="/search?p=sale">Properties</Link>
+        <Link href="/projects">Projects</Link>
+        <Link href="/services">Services</Link>
+        <Link href="/#about">About</Link>
+        <Link href="/#contact">Contact</Link>
+        <a href={`tel:+${business.phone.number}`}>{business.phone.label}</a>
+      </nav>
       <PurposeToggle value={purpose} />
       <ThemeControl />
       <Link
