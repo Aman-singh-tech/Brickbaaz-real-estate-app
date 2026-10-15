@@ -159,10 +159,8 @@ try {
   await expect(heroVideo).toBeVisible();
   await expect.poll(() => heroVideo.evaluate(v => v.readyState)).toBeGreaterThan(1);
   assert.equal(await heroVideo.evaluate(v => v.muted && v.loop && v.playsInline), true);
-  await page.getByRole('button', { name: 'Pause promotional video' }).click();
-  await expect(page.getByRole('button', { name: 'Play promotional video' })).toBeVisible();
-  assert.equal(await heroVideo.evaluate(v => v.paused), true);
-  await page.getByRole('button', { name: 'Play promotional video' }).click();
+  await expect(page.locator('.hero-video-controls')).toHaveCount(0);
+  assert.equal(await heroVideo.evaluate(v => v.controls), false);
   await expect.poll(() => heroVideo.evaluate(v => v.paused)).toBe(false);
   console.log(await heroVideo.evaluate(v => ({ duration: v.duration, width: v.videoWidth, height: v.videoHeight })));
   for (const id of [

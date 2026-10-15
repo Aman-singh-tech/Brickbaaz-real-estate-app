@@ -3,7 +3,6 @@ import { useEffect, useRef, useState } from "react";
 
 export default function HeroVideo() {
   const video = useRef(null);
-  const [paused, setPaused] = useState(true);
   const [failed, setFailed] = useState(false);
   useEffect(() => {
     const preference = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -16,10 +15,7 @@ export default function HeroVideo() {
   }, []);
   return <>
     <div className="absolute inset-0 bg-navy" />
-    {!failed && <video ref={video} src="/videos/brickbaaz-tour-landscape.mp4?v=hd-20261015" muted loop playsInline preload="none" aria-label="Brickbaaz promotional video" className="hero-video-main" onPlay={() => { setPaused(false); }} onPause={() => { setPaused(true);  }} onError={() => setFailed(true)} />}
-    <div className="hero-video-controls flex items-center justify-center gap-4 bg-navy py-3 text-xs font-bold text-white">
-      {!failed && <button type="button" aria-label={paused ? "Play promotional video" : "Pause promotional video"} onClick={() => { if (video.current.paused) video.current.play().catch(() => {}); else video.current.pause(); }}>{paused ? "Play" : "Pause"}</button>}
-      <a href="/videos/brickbaaz-tour-landscape.mp4?v=hd-20261015" target="_blank" rel="noopener noreferrer" className="underline underline-offset-4">Watch full video ↗</a>
-    </div>
+    {!failed && <video ref={video} src="/videos/brickbaaz-tour-landscape.mp4?v=hd-20261015" muted loop playsInline preload="none" aria-label="Brickbaaz promotional video" className="hero-video-main" onError={() => setFailed(true)} />}
+
   </>;
 }
