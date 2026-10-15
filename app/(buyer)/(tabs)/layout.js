@@ -1,10 +1,11 @@
 import TopBar from "@/components/TopBar";
+import CustomerExperience from "@/components/CustomerExperience";
 
 export default function TabsLayout({ children }) {
   return (
-    <div className="shell customer-shell">
+    <CustomerExperience><div className="shell customer-shell">
       <TopBar />
       <main className="flex flex-1 flex-col">{children}</main>
-    </div>
+    </div></CustomerExperience>
   );
 }

@@ -125,6 +125,21 @@ try {
   assert.equal(new URL(await page.locator('link[rel="canonical"]').getAttribute('href')).href, url + '/');
   await expect(page.locator('meta[property="og:title"]')).toHaveAttribute('content', /Properties in Gurugram/);
   const structured = await page.locator('script[type="application/ld+json"]').textContent();
+  await page.getByLabel('Appearance', { exact: true }).selectOption('dark');
+  await expect(page.locator('.customer-experience')).toHaveAttribute('data-theme', 'dark');
+  await page.reload();
+  await expect(page.getByLabel('Appearance', { exact: true })).toHaveValue('dark');
+  await expect(page.locator('.customer-experience')).toHaveAttribute('data-theme', 'dark');
+  assert.equal(await page.locator('.customer-experience').evaluate(el => getComputedStyle(el, '::before').position), 'fixed');
+  await page.locator('#properties').scrollIntoViewIfNeeded();
+  await expect(page.locator('#properties h2')).toHaveClass(/heading-visible/);
+  await expect(page.locator('.customer-shell > header')).toHaveClass(/header-scrolled/);
+  await page.evaluate(async () => { await Promise.all(document.getAnimations().map(a => a.finished.catch(() => {}))); });
+  await fs.mkdir('.tmp-projects', { recursive: true });
+  await page.screenshot({ path: '.tmp-projects/brickbaaz-night-effects.png' });
+  await page.getByLabel('Appearance', { exact: true }).selectOption('light');
+  await expect(page.locator('.customer-experience')).toHaveAttribute('data-theme', 'light');
+
   assert.equal(JSON.parse(structured)['@graph'][0].name, 'Brickbaaz');
   const sitemap = await (await fetch(url + '/sitemap.xml')).text();
   assert.ok(sitemap.includes('/projects/homepage-project'));

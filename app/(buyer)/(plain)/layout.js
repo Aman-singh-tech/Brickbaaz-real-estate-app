@@ -1,3 +1,4 @@
+import CustomerExperience from "@/components/CustomerExperience";
 export default function PlainLayout({ children }) {
-  return <div className="shell">{children}</div>;
+  return <CustomerExperience><div className="shell">{children}</div></CustomerExperience>;
 }

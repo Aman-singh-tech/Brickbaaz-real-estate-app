@@ -2,6 +2,7 @@ import Link from "next/link";
 import { cookies } from "next/headers";
 import { Logo, Icon } from "@/components/ui";
 import CustomerNavigation from "@/components/CustomerNavigation";
+import { ThemeControl } from "@/components/CustomerExperience";
 import PurposeToggle from "@/components/PurposeToggle";
 import { getBuyer } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
@@ -31,6 +32,7 @@ export default async function TopBar() {
       </Link>
       <span className="flex-1" />
       <PurposeToggle value={purpose} />
+      <ThemeControl />
       <Link
         href="/notifications"
         aria-label="Notifications"

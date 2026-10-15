@@ -44,7 +44,7 @@ export function Card({ children, className, as: Tag = "div", ...rest }) {
   );
 }
 
-const btnBase = "inline-flex items-center justify-center gap-1.5 rounded-xl px-4 py-3 text-[13.5px] font-bold transition active:scale-[.98] disabled:opacity-50";
+const btnBase = "motion-button inline-flex items-center justify-center gap-1.5 rounded-xl px-4 py-3 text-[13.5px] font-bold transition active:scale-[.98] disabled:opacity-50";
 const btnTone = {
   primary: "bg-navy text-white",
   brand: "bg-brand text-white",

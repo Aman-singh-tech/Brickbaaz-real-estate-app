@@ -241,3 +241,42 @@ html {
 .home-page .video-hero, .home-page .brand-film { height:auto; min-height:0; padding:0; }
 .video-hero > .hero-video-main, .brand-film > .hero-video-main { display:block; width:100%; height:auto; aspect-ratio:16 / 9; object-fit:contain; }
 .video-hero .hero-video-controls, .brand-film .hero-video-controls { position:relative; inset:auto; border-radius:0; padding:10px 16px; }
+
+/* Brickbaaz customer experience: fixed architecture and matching motion. */
+.customer-experience { --color-page:#faf8f3; --color-ink:#232a28; --color-mute:#666e6b; --color-line:#dedbd3; --color-fill:#efece5; --color-brand:#98683e; --color-brand-soft:#f0e4d6; position:relative; isolation:isolate; min-height:100dvh; color:var(--color-ink); background:var(--color-page); color-scheme:light; transition:background-color .4s,color .4s; }
+.customer-experience::before { content:''; position:fixed; inset:0; z-index:-1; pointer-events:none; background-color:var(--color-brand); mask:url('/architectural-lines.svg') center / cover no-repeat; opacity:.12; transition:background-color .4s,opacity .4s; }
+.customer-experience > .shell { background:transparent; }
+.customer-experience[data-theme=dark] { --color-page:#181e20; --color-ink:#f1eee7; --color-mute:#b2b8b4; --color-line:#41494a; --color-fill:#303839; --color-brand:#d8a779; --color-brand-soft:#40362d; color-scheme:dark; }
+.customer-experience[data-theme=dark]::before { opacity:.17; }
+.customer-experience[data-theme=dark] .bg-white, .customer-experience[data-theme=dark] [class~='bg-white/95'], .customer-experience[data-theme=dark] .customer-menu { background-color:#232b2d; }
+.customer-experience[data-theme=dark] .text-navy { color:var(--color-ink); }
+.customer-experience[data-theme=dark] .bg-brand { color:#181e20; }
+.customer-experience .premium-card, .customer-experience .property-card, .customer-experience .project-card, .customer-experience input, .customer-experience select, .customer-experience textarea { transition:background-color .35s,border-color .35s,color .35s,box-shadow .25s,transform .25s; }
+.customer-experience .customer-shell > header { transition:background-color .3s,box-shadow .3s; }
+.customer-experience .customer-shell > header.header-scrolled { background-color:#fffdf8; box-shadow:0 5px 24px rgb(20 26 24 / .12); }
+.customer-experience[data-theme=dark] .customer-shell > header.header-scrolled { background-color:#232b2d; box-shadow:0 5px 24px rgb(0 0 0 / .3); }
+.theme-control select { max-width:110px; padding:7px 5px; border:1px solid var(--color-line); border-radius:8px; background:var(--color-fill); font-size:11px; color:var(--color-ink); }
+.architectural-heading::after { content:''; display:block; width:48px; height:2px; margin-top:12px; background:var(--color-brand); transform-origin:left; transform:scaleX(0); transition:transform .6s cubic-bezier(.2,.65,.3,1); }
+.architectural-heading.heading-visible::after { transform:scaleX(1); }
+.customer-experience .motion-button { transition:transform .2s,box-shadow .2s,background-color .2s; }
+.customer-experience .motion-button:active { transform:translateY(1px) scale(.98); }
+.customer-experience .motion-button:focus-visible, .theme-control select:focus-visible { outline:2px solid var(--color-brand); outline-offset:4px; }
+.motion-button > [aria-hidden=true], .motion-button > svg:last-child { transition:transform .2s; }
+@media(hover:hover) and (pointer:fine) { .customer-experience .motion-button:hover { box-shadow:0 5px 15px rgb(0 0 0 / .12); } .motion-button:hover > [aria-hidden=true], .motion-button:hover > svg:last-child { transform:translateX(3px); } }
+.listing-skeleton-grid { display:grid; gap:24px; grid-template-columns:minmax(0,1fr); }
+.skeleton-surface { background:linear-gradient(100deg,var(--color-fill) 25%,var(--color-line) 45%,var(--color-fill) 65%); background-size:220% 100%; animation:listing-shimmer 1.6s ease-in-out infinite; }
+@keyframes listing-shimmer { from { background-position:100% 0; } to { background-position:-100% 0; } }
+@media(min-width:768px) { .listing-skeleton-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+@media(min-width:1024px) { .listing-skeleton-grid { grid-template-columns:repeat(3,minmax(0,1fr)); } }
+@media(prefers-reduced-motion:reduce) { .customer-experience, .customer-experience::before, .customer-experience *, .customer-experience *::after { transition:none!important; animation:none!important; } .architectural-heading::after { transform:scaleX(1); } .customer-experience .motion-button:hover, .customer-experience .motion-button:active, .customer-experience .motion-button:hover > svg { transform:none; } }
+
+.customer-experience[data-theme=dark] .home-heading { color:var(--color-ink); }
+
+/* Keep utility colours in sync with customer theme variables. */
+.customer-experience .text-ink { color:var(--color-ink); }
+.customer-experience .text-mute { color:var(--color-mute); }
+.customer-experience .text-brand { color:var(--color-brand); }
+.customer-experience .bg-fill { background-color:var(--color-fill); }
+.customer-experience .bg-brand-soft { background-color:var(--color-brand-soft); }
+.customer-experience .bg-brand { background-color:var(--color-brand); }
+.customer-experience .border-line { border-color:var(--color-line); }

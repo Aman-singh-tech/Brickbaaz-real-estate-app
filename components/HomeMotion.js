@@ -46,10 +46,8 @@ export default function HomeMotion({ children }) {
     root.current
       .querySelectorAll("[data-reveal]")
       .forEach((section) => observer.observe(section));
-    const header = document.querySelector(".customer-shell > header");
     const scroll = () => {
       setShowTop(window.scrollY > 600);
-      header?.classList.toggle("header-scrolled", window.scrollY > 24);
     };
     const preference = () => {
       if (reduced.matches)
@@ -63,7 +61,6 @@ export default function HomeMotion({ children }) {
       animations.forEach((animation) => animation.cancel());
       window.removeEventListener("scroll", scroll);
       reduced.removeEventListener("change", preference);
-      header?.classList.remove("header-scrolled");
     };
   }, []);
   return (
