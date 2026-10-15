@@ -75,7 +75,7 @@ function Skyline() {
 
 export default function Hero({ photos = [] }) {
   const photo = hasPhoto();
-  const hasVideo = fs.existsSync(path.join(process.cwd(), "public", "videos", "brickbaaz-promotional.mp4"));
+  const hasVideo = fs.existsSync(path.join(process.cwd(), "public", "videos", "brickbaaz-tour-landscape.mp4"));
   const gallery = [
     ...(photo ? [{ url: "/hero.jpg", title: "Brickbaaz" }] : []),
     ...photos,
