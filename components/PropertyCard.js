@@ -10,7 +10,6 @@ import {
   formatPrice,
   perSqft,
   TYPE_LABEL,
-  propertyTitle,
 } from "@/lib/format";
 
 export function Cover({ property, className, children }) {
@@ -26,7 +25,7 @@ export function Cover({ property, className, children }) {
         // eslint-disable-next-line @next/next/no-img-element
         <img
           src={imgUrl(img.url, 640)}
-          alt={propertyTitle(property)}
+          alt={property.title}
           loading="lazy"
           className="absolute inset-0 h-full w-full object-cover"
         />
@@ -51,7 +50,7 @@ function badgeFor(p) {
           : "UNDER CONSTRUCTION"}
       </Pill>
     );
-  return <Pill tone="soft">{p.purpose === "RENT" ? "FOR RENT" : "FOR SALE"}</Pill>;
+  return <Pill tone="ok">ZERO BROKERAGE</Pill>;
 }
 
 export default function PropertyCard({
@@ -78,7 +77,7 @@ export default function PropertyCard({
         <SaveButton propertyId={p.id} initial={saved} />
       </div>
       <Link href={`/property/${p.id}`} className="block p-2.5 pb-0">
-        <Cover property={p} className={compact ? "h-36" : "h-56"}>
+        <Cover property={p} className={compact ? "h-36" : "h-48"}>
           <div className="absolute left-2.5 top-2.5 flex flex-wrap gap-1.5">
             {badgeFor(p)}
           </div>
@@ -106,7 +105,7 @@ export default function PropertyCard({
           href={`/property/${p.id}`}
           className="mt-0.5 block text-[15px] font-bold leading-snug"
         >
-          {propertyTitle(p)}
+          {p.title}
         </Link>
         <p className="mt-0.5 flex items-center gap-1 text-xs text-mute">
           <Icon name="pin" className="h-3.5 w-3.5" />

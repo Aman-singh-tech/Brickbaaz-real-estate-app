@@ -20,7 +20,6 @@ import {
   formatPrice,
   perSqft,
   TYPE_LABEL,
-  propertyTitle,
   cityLabel,
 } from "@/lib/format";
 
@@ -31,7 +30,7 @@ export async function generateMetadata({ params }) {
     return { title: "Property unavailable", robots: { index: false, follow: false } };
   const description = `${TYPE_LABEL[p.type]} ${p.purpose === "RENT" ? "for rent" : "for sale"} in ${[p.locality, p.city].filter(Boolean).join(", ")}. ${formatPrice(p)}${p.superArea ? ` · ${p.superArea} sq.ft` : ""}. View photos, property details and enquire with Brickbaaz.`;
   return {
-    ...pageMetadata(propertyTitle(p), description, `/property/${p.id}`, p.media.find(m => m.kind === "IMAGE")?.url || "/hero.jpg"),
+    ...pageMetadata(p.title, description, `/property/${p.id}`, p.media.find(m => m.kind === "IMAGE")?.url || "/hero.jpg"),
     ...(p.status !== "ACTIVE" ? { robots: { index: false, follow: true } } : {}),
   };
 }
@@ -152,7 +151,7 @@ export default async function PropertyPage({ params, searchParams }) {
               <Pill tone="soft">{TYPE_LABEL[p.type]}</Pill>
             </div>
             <h1 className="text-[22px] font-extrabold leading-tight tracking-tight">
-              {propertyTitle(p)}
+              {p.title}
             </h1>
             <p className="flex items-start gap-1.5 text-[13px] text-mute">
               <Icon name="pin" className="mt-0.5 h-4 w-4 shrink-0" />

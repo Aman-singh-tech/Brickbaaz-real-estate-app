@@ -10,13 +10,12 @@ import TestimonialCard from "@/components/TestimonialCard";
 import InterestForm from "@/components/InterestForm";
 import HomeMotion from "@/components/HomeMotion";
 import Hero from "@/components/Hero";
-import HomeSearch from "@/components/HomeSearch";
 import { Card, Icon, Logo, SectionTitle, btn } from "@/components/ui";
 import { prisma } from "@/lib/prisma";
 import { projectInclude } from "@/lib/projects";
 import { businessInfo } from "@/lib/business";
-import { TYPE_LABEL } from "@/lib/format";
-import { cityWhere } from "@/lib/city";
+import { TYPE_LABEL, cityLabel, imgUrl } from "@/lib/format";
+import { CUSTOMER_CITIES, cityWhere } from "@/lib/city";
 import { categoryCounts, featured, savedIds } from "@/lib/properties";
 import { getBuyer } from "@/lib/auth";
 
@@ -127,13 +126,75 @@ export default async function Explore({ searchParams }) {
           { "@type": "WebSite", "@id": absoluteUrl("/#website"), name: "Brickbaaz", url: absoluteUrl("/"), publisher: { "@id": absoluteUrl("/#organization") } },
         ],
       }).replace(/</g, "\\u003c") }} />
-      <Hero />
+      <Hero
+        photos={items
+          .flatMap((property) => {
+            const photo = property.media.find(
+              (media) => media.kind === "IMAGE",
+            );
+            return photo
+              ? [{ url: imgUrl(photo.url, 1600), title: property.title }]
+              : [];
+          })
+          .slice(0, 2)}
+      />
       <Card
         className="home-search relative z-10 space-y-4 !rounded-3xl !p-5 shadow-xl md:!p-7"
         style={{ marginTop: -56 }}
       >
-        <h2 className="text-lg font-bold md:text-xl">Find a property that fits your life</h2>
-        <HomeSearch purpose={purpose} city={city} />
+        <h1 className="text-lg font-extrabold md:text-2xl">Properties in Gurugram</h1>
+        <form action="/search" className="space-y-3">
+          <div className="grid grid-cols-2 rounded-xl bg-fill p-1 text-center text-[13px] font-bold">
+            {[
+              ["sale", "Buy Properties"],
+              ["rent", "Rent Homes"],
+            ].map(([v, l]) => (
+              <label
+                key={v}
+                className="cursor-pointer rounded-lg py-2.5 has-[:checked]:bg-white has-[:checked]:shadow-sm"
+              >
+                <input
+                  type="radio"
+                  name="p"
+                  value={v}
+                  defaultChecked={purpose === v}
+                  className="sr-only"
+                />
+                {l}
+              </label>
+            ))}
+          </div>
+          <label className="block">
+            <span className="mb-1 block text-[11px] font-bold text-mute">
+              Selected city
+            </span>
+            <select
+              name="city"
+              defaultValue={city}
+              className="w-full rounded-xl border border-line bg-fill px-3.5 py-3 text-sm font-semibold"
+            >
+              {CUSTOMER_CITIES.map((c) => (
+                <option key={c} value={c}>
+                  {cityLabel(c)}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="block">
+            <span className="mb-1 block text-[11px] font-bold text-mute">
+              Locality, project or BHK
+            </span>
+            <input
+              name="q"
+              placeholder="e.g. Sector 67, Golf Course Road, 3 BHK"
+              className="w-full rounded-xl border border-line bg-fill px-3.5 py-3 text-sm outline-none focus:border-navy"
+            />
+          </label>
+          <button className={btn("primary", "w-full")}>
+            <Icon name="search" className="h-4 w-4" />
+            Search Properties
+          </button>
+        </form>
         <div className="no-scrollbar flex gap-2 overflow-x-auto">
           {[
             ["Ready to Move", `/search?p=${purpose}&poss=READY`],
@@ -150,6 +211,109 @@ export default async function Explore({ searchParams }) {
           ))}
         </div>
       </Card>
+
+      <section
+        id="about"
+        data-reveal
+        className="home-section grid items-center gap-8 lg:grid-cols-2 lg:gap-14"
+      >
+        <div className="space-y-6">
+          <Heading
+            eyebrow="ABOUT BRICKBAAZ"
+            title="A clearer path to your next address."
+          >
+            {business.intro}
+          </Heading>
+          <div className="space-y-3">
+            {[
+              [
+                "Real listing details",
+                "Explore the photos, pricing and information added by our property desk.",
+              ],
+              [
+                "A conversation, not a guess",
+                "Send your questions and discuss availability before planning a visit.",
+              ],
+              [
+                "Your shortlist, in one place",
+                "Save the properties you like and return when you are ready.",
+              ],
+            ].map(([title, body]) => (
+              <div key={title} className="flex gap-3">
+                <span className="mt-1 grid h-7 w-7 shrink-0 place-items-center rounded-full bg-brand-soft text-brand">
+                  <Icon name="check" className="h-4 w-4" />
+                </span>
+                <div>
+                  <h3 className="text-sm font-bold">{title}</h3>
+                  <p className="mt-1 text-sm leading-6 text-mute">{body}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+          <a href="#contact" className={btn("primary")}>
+            Talk to Brickbaaz <span aria-hidden="true">↗</span>
+          </a>
+        </div>
+        <div className="about-panel relative overflow-hidden rounded-[32px] bg-navy p-7 text-white md:p-10">
+          <div className="relative z-10">
+            <p className="text-xs font-bold tracking-widest text-[#f2bc87]">
+              FOCUSED ON GURUGRAM
+            </p>
+            <p className="mt-5 text-3xl font-extrabold leading-tight md:text-4xl">
+              A place to live.
+              <br />
+              Space to grow.
+              <br />
+              <span className="text-[#f2bc87]">A move that feels right.</span>
+            </p>
+            <p className="mt-6 max-w-sm text-sm leading-7 text-white/70">
+              Homes, builder floors, plots and commercial spaces. Discover your
+              options at your own pace.
+            </p>
+            <div className="mt-10 grid grid-cols-2 gap-3">
+              {[
+                ["home", "Properties"],
+                ["building", "Builder projects"],
+                ["map", "Site visits"],
+                ["calc", "Loan enquiries"],
+              ].map(([icon, label]) => (
+                <div
+                  key={label}
+                  className="rounded-2xl border border-white/10 bg-white/5 p-4"
+                >
+                  <Icon name={icon} className="mb-3 h-5 w-5 text-[#f2bc87]" />
+                  <p className="text-xs font-semibold">{label}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section data-reveal className="home-section space-y-5">
+        <SectionTitle action="View all →" href={`/search?p=${purpose}`}>
+          Explore by property type
+        </SectionTitle>
+        <div className="category-grid grid grid-cols-2 gap-3">
+          {CATS.map(([type, icon]) => (
+            <Link
+              key={type}
+              href={`/search?p=${purpose}&type=${type}`}
+              className="home-service-card rounded-2xl border border-line bg-white p-5 text-center"
+            >
+              <span className="mx-auto mb-3 grid h-10 w-10 place-items-center rounded-xl bg-brand-soft text-brand">
+                <Icon name={icon} />
+              </span>
+              <p className="text-sm font-bold">
+                {TYPE_LABEL[type].split(" / ")[0]}
+              </p>
+              <p className="mt-1 text-xs text-mute">
+                {counts[type] ?? 0} listings
+              </p>
+            </Link>
+          ))}
+        </div>
+      </section>
 
       <section id="properties" data-reveal className="home-section space-y-6">
         <div className="flex flex-wrap items-end justify-between gap-4">
@@ -184,31 +348,6 @@ export default async function Explore({ searchParams }) {
         </Link>
       </section>
 
-      <section data-reveal className="home-section space-y-5">
-        <SectionTitle action="View all →" href={`/search?p=${purpose}`}>
-          Explore by property type
-        </SectionTitle>
-        <div className="category-grid grid grid-cols-2 gap-3">
-          {CATS.map(([type, icon]) => (
-            <Link
-              key={type}
-              href={`/search?p=${purpose}&type=${type}`}
-              className="home-service-card rounded-2xl border border-line bg-white p-5 text-center"
-            >
-              <span className="mx-auto mb-3 grid h-10 w-10 place-items-center rounded-xl bg-brand-soft text-brand">
-                <Icon name={icon} />
-              </span>
-              <p className="text-sm font-bold">
-                {TYPE_LABEL[type].split(" / ")[0]}
-              </p>
-              <p className="mt-1 text-xs text-mute">
-                {counts[type] ?? 0} listings
-              </p>
-            </Link>
-          ))}
-        </div>
-      </section>
-
       <section id="home-loan-emi" data-reveal className="home-section space-y-6" aria-labelledby="home-loan-title">
         <div className="space-y-3">
           <p className="home-eyebrow">PLAN YOUR HOME LOAN</p>
@@ -218,7 +357,6 @@ export default async function Explore({ searchParams }) {
         <HomeLoanCalculator />
       </section>
 
-      {projects.length > 0 && (
       <section id="projects" data-reveal className="home-section space-y-6">
         <Heading eyebrow="NEW POSSIBILITIES" title="Explore builder projects">
           Compare project locations, available configurations and starting
@@ -240,7 +378,6 @@ export default async function Explore({ searchParams }) {
           View all projects <span aria-hidden="true">→</span>
         </Link>
       </section>
-      )}
 
       <section id="our-services" data-reveal className="home-section space-y-7">
         <Heading
@@ -308,7 +445,6 @@ export default async function Explore({ searchParams }) {
         </a>
       </section>
 
-      {stories.length > 0 && (
       <section id="experiences" data-reveal className="home-section space-y-6">
         <Heading
           eyebrow="CUSTOMER EXPERIENCES"
@@ -340,12 +476,6 @@ export default async function Explore({ searchParams }) {
         <Link href="/testimonials" className={btn("soft")}>
           View customer stories →
         </Link>
-      </section>
-      )}
-
-      <section id="about" data-reveal className="home-section about-brief grid gap-6 lg:grid-cols-2">
-        <Heading eyebrow="ABOUT BRICKBAAZ" title="Local knowledge. Personal guidance.">{business.intro}</Heading>
-        <div className="space-y-4"><p className="text-sm leading-7 text-mute">Compare real listing details, save your shortlist and speak to our property desk before arranging a visit.</p><a href="#contact" className={btn("primary")}>Talk to our property desk <span aria-hidden="true">→</span></a></div>
       </section>
 
       <section
@@ -456,7 +586,7 @@ export default async function Explore({ searchParams }) {
             <h2 className="text-sm font-bold">Brickbaaz</h2>
             <div className="mt-4 flex flex-col gap-3 text-sm text-white/65">
               <a href="#about">About us</a>
-              {stories.length > 0 && <a href="#experiences">Customer experiences</a>}
+              <a href="#experiences">Customer experiences</a>
               <a href="#contact">Contact & support</a>
               <Link href="/privacy">Privacy Policy</Link>
               <Link href="/terms">Terms & Conditions</Link>
