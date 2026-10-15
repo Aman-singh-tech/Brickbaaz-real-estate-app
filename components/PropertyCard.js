@@ -59,6 +59,7 @@ export default function PropertyCard({
   compact = false,
 }) {
   const price = formatPrice(p);
+  const photoCount = p.media?.filter(m => m.kind === "IMAGE").length ?? 0;
   const sq = perSqft(p);
   const facts = [
     bhkLabel(p),
@@ -72,12 +73,13 @@ export default function PropertyCard({
       : null;
 
   return (
-    <article className="property-card relative overflow-hidden rounded-3xl border border-line bg-white shadow-sm">
+    <article className="property-card premium-listing relative overflow-hidden rounded-3xl border border-line bg-white shadow-sm">
       <div className="absolute right-5 top-5 z-10">
         <SaveButton propertyId={p.id} initial={saved} />
       </div>
-      <Link href={`/property/${p.id}`} className="block p-2.5 pb-0">
-        <Cover property={p} className={compact ? "h-36" : "h-48"}>
+      <Link href={`/property/${p.id}`} className="listing-photo-link block p-2.5 pb-0" aria-label={`View ${p.title}`}>
+        <Cover property={p} className={compact ? "h-36" : "h-56"}>
+          {photoCount > 0 && <span className="listing-photo-count">{photoCount} {photoCount === 1 ? "photo" : "photos"}</span>}
           <div className="absolute left-2.5 top-2.5 flex flex-wrap gap-1.5">
             {badgeFor(p)}
           </div>
@@ -91,7 +93,7 @@ export default function PropertyCard({
           </div>
         </Cover>
       </Link>
-      <div className="px-4 pb-4 pt-3">
+      <div className="listing-body px-4 pb-4 pt-3">
         <div className="flex items-baseline justify-between gap-2">
           <span className="text-xl font-extrabold tracking-tight">
             {price}
@@ -120,7 +122,7 @@ export default function PropertyCard({
             </Pill>
           ))}
         </div>
-        <div className="mt-3.5 flex items-center gap-2">
+        <div className="listing-actions mt-3.5 flex items-center gap-2">
           <span className="min-w-0 flex-1 text-[11.5px] text-mute">
             {monthly ? (
               <>

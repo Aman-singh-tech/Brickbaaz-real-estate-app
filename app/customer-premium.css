@@ -1,0 +1,44 @@
+/* Customer-only finish; the tour, content order and owner workspace stay intact. */
+.desktop-discovery-nav { display:none; }
+.customer-experience .home-page .home-heading { font-size:clamp(28px,3vw,40px); font-weight:650; letter-spacing:-.045em; line-height:1.18; }
+.customer-experience .home-page .home-eyebrow { font-size:10px; letter-spacing:.22em; }
+.customer-experience .home-page .home-section { scroll-margin-top:120px; }
+.customer-experience .home-search { border:1px solid var(--color-line); box-shadow:0 18px 55px rgb(18 29 26 / .08); border-radius:20px!important; }
+.customer-experience .home-search h1 { font-size:clamp(20px,2vw,28px); letter-spacing:-.035em; font-weight:700; }
+.customer-experience .home-search input, .customer-experience .home-search select { border-radius:10px; min-height:50px; }
+.customer-experience .premium-listing { display:flex; flex-direction:column; border-radius:18px; box-shadow:0 6px 22px rgb(15 25 22 / .04); border-color:var(--color-line); }
+.customer-experience .premium-listing .listing-photo-link { padding:0; }
+.customer-experience .premium-listing .listing-photo-link > div { border-radius:0; }
+.listing-photo-count { position:absolute; right:16px; top:64px; border:1px solid rgb(255 255 255 / .25); border-radius:6px; padding:4px 8px; color:white; background:rgb(10 18 25 / .65); font-size:10px; font-weight:600; }
+.customer-experience .premium-listing .listing-body { display:flex; flex:1; flex-direction:column; padding:20px; }
+.customer-experience .premium-listing .listing-body > a:first-of-type { font-size:17px; line-height:1.45; margin-top:6px; }
+.customer-experience .premium-listing .listing-body > div:first-child > span:first-child { font-size:24px; font-weight:750; }
+.customer-experience .premium-listing .listing-actions { display:grid; grid-template-columns:1fr 1fr; padding-top:18px; margin-top:auto; gap:10px; }
+.customer-experience .premium-listing .listing-actions > span { grid-column:1 / -1; padding-top:10px; font-size:12px; }
+.customer-experience .premium-listing .listing-actions > a { font-size:12px; border-radius:9px; min-height:43px; }
+.customer-experience .premium-listing .listing-body > a:last-child { padding-top:4px; font-size:11px; }
+.customer-experience .home-service-card { border-radius:18px; border-color:var(--color-line); }
+.customer-experience .project-card { border-radius:18px; border-color:var(--color-line); box-shadow:0 6px 22px rgb(15 25 22 / .04); }
+.customer-experience .category-grid > a { border-radius:14px; box-shadow:0 3px 14px rgb(18 29 26 / .025); }
+.customer-experience .category-grid > a:hover { border-color:var(--color-brand); }
+.customer-experience .home-footer { border-radius:24px 24px 0 0; }
+.customer-experience .about-panel { background:#172929; border-radius:24px; }
+.customer-experience .about-panel::after { opacity:.45; }
+.customer-experience .motion-button { border-radius:10px; }
+.customer-experience[data-theme=dark] .premium-listing { box-shadow:0 8px 28px rgb(0 0 0 / .16); }
+.customer-experience[data-theme=dark] .home-search { box-shadow:0 18px 55px rgb(0 0 0 / .2); }
+@media (min-width:1100px) {
+  .desktop-discovery-nav { display:flex; align-items:center; gap:24px; margin-right:28px; }
+  .desktop-discovery-nav a { position:relative; padding-block:12px; font-size:12px; font-weight:650; color:var(--color-ink); }
+  .desktop-discovery-nav a::after { content:''; position:absolute; bottom:4px; left:0; right:0; height:2px; background:var(--color-brand); transform:scaleX(0); transform-origin:left; transition:transform .25s; }
+  .desktop-discovery-nav a:hover::after, .desktop-discovery-nav a[aria-current=page]::after { transform:scaleX(1); }
+  .customer-experience .customer-shell > header { min-height:78px; gap:8px; }
+  .customer-experience .home-page .property-grid { gap:24px; }
+}
+@media (hover:hover) and (pointer:fine) {
+  .customer-experience .premium-listing:hover { transform:translateY(-4px); box-shadow:0 16px 40px rgb(15 25 22 / .1); border-color:var(--color-brand); }
+}
+@media (prefers-reduced-motion:reduce) {
+  .customer-experience .premium-listing:hover { transform:none; }
+  .desktop-discovery-nav a::after { transition:none; }
+}

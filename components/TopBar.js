@@ -2,6 +2,7 @@ import Link from "next/link";
 import { cookies } from "next/headers";
 import { Logo, Icon } from "@/components/ui";
 import CustomerNavigation from "@/components/CustomerNavigation";
+import DesktopNavigation from "@/components/DesktopNavigation";
 import { ThemeControl } from "@/components/CustomerExperience";
 import PurposeToggle from "@/components/PurposeToggle";
 import { getBuyer } from "@/lib/auth";
@@ -28,9 +29,10 @@ export default async function TopBar() {
     <header className="sticky top-0 z-30 flex items-center gap-1 border-b border-line bg-white/95 px-3 py-2.5 backdrop-blur">
       <CustomerNavigation />
       <Link href="/" aria-label="Brickbaaz home">
-        <Logo size="text-[14px]" />
+        <Logo size="text-[14px] lg:text-xl" />
       </Link>
       <span className="flex-1" />
+      <DesktopNavigation />
       <PurposeToggle value={purpose} />
       <ThemeControl />
       <Link

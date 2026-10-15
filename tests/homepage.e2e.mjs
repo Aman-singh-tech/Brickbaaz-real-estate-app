@@ -120,6 +120,7 @@ try {
   });
   page.on("pageerror", (e) => errors.push(e.message));
   await page.goto(url + "/?utm_source=homepage-test&utm_campaign=launch");
+  await expect(page.getByRole('navigation', { name: 'Main navigation', exact: true })).toBeVisible();
   await expect(page.locator('h1')).toContainText('Properties in Gurugram');
   await expect(page.locator('.home-hero .hero-copy')).toHaveCount(0);
   assert.equal(new URL(await page.locator('link[rel="canonical"]').getAttribute('href')).href, url + '/');
@@ -152,6 +153,7 @@ try {
   await expect(farmCard).toContainText('1 listings');
   await farmCard.click();
   await expect(page).toHaveURL(/type=FARM_HOUSE/);
+  await expect(page.getByRole('navigation', { name: 'Main navigation', exact: true }).getByRole('link', { name: 'Properties', exact: true })).toHaveAttribute('aria-current', 'page');
   await expect(page.getByText('Gurugram farm retreat', { exact: true })).toBeVisible();
   await expect(page.getByText('Homepage featured home', { exact: true })).toHaveCount(0);
   await page.goto(url + "/?utm_source=homepage-test&utm_campaign=launch");
@@ -259,7 +261,7 @@ try {
   await page.getByRole("button", { name: "Back to top" }).click();
   await expect.poll(() => page.evaluate(() => window.scrollY)).toBeLessThan(5);
   await fs.mkdir(".tmp-projects", { recursive: true });
-  for (const width of [375, 768, 1440]) {
+  for (const width of [375, 768, 1024, 1280, 1440]) {
     await page.setViewportSize({ width, height: 960 });
     await page.goto(url);
     await expect(page.locator('.video-hero')).toBeVisible();

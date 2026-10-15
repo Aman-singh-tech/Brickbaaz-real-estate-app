@@ -1,6 +1,7 @@
 @import "tailwindcss";
 
 @import "leaflet/dist/leaflet.css";
+@import "./customer-premium.css";
 
 /* Featured listings: full-width mobile cards and three columns on laptops. */
 #properties .property-grid {
