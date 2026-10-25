@@ -48,7 +48,12 @@ try {
     } catch {}
     await new Promise((r) => setTimeout(r, 500));
   }
-  browser = await chromium.launch();
+  browser = await chromium.launch({
+    args: [
+      "--use-fake-device-for-media-stream",
+      "--use-fake-ui-for-media-stream",
+    ],
+  });
   const admin = await browser.newContext();
   const body = Buffer.from(
     JSON.stringify({ uid: owner.id, kind: "OWNER", exp: Date.now() + 3600000 }),
@@ -67,7 +72,7 @@ try {
   const linkInput = page.getByLabel("Posting link");
   await expect(linkInput).toHaveCount(1);
   const inviteUrl = await linkInput.inputValue();
-  const guest = await browser.newContext(),
+  const guest = await browser.newContext({ permissions: ["camera"] }),
     form = await guest.newPage(),
     customer = await guest.newPage();
   await customer.goto(url + "/search");
@@ -120,6 +125,19 @@ try {
     await expect(
       form.getByRole("button", { name: /Publish listing/ }),
     ).toBeEnabled();
+    await form.getByRole("button", { name: "Take photo", exact: true }).click();
+    await expect(
+      form.getByRole("button", { name: "Capture photo", exact: true }),
+    ).toBeEnabled();
+    await form
+      .getByRole("button", { name: "Capture photo", exact: true })
+      .click();
+    await expect(
+      form.getByRole("dialog", { name: "Take a property photo" }),
+    ).toHaveCount(0);
+    await expect(
+      form.getByRole("button", { name: "Remove photo", exact: true }),
+    ).toHaveCount(3);
     await form.getByLabel("I confirm these details are correct.").check();
     await form.getByRole("button", { name: /Publish listing/ }).click();
     await expect(
@@ -134,7 +152,7 @@ try {
   assert.equal(property.status, "ACTIVE");
   assert.equal(property.ownerId, owner.id);
   assert.equal(property.submission.phone, privatePhone);
-  assert.equal(property.media.length, 2);
+  assert.equal(property.media.length, 3);
   await expect(
     customer.getByText("Invited Home One", { exact: true }).first(),
   ).toBeVisible({ timeout: 20000 });
@@ -151,6 +169,30 @@ try {
       "Private data leak " + path,
     );
   }
+  // Owner edit uses the same camera capture and upload flow.
+  await page.route("**/api/owner/upload-sign", (r) =>
+    r.fulfill({ json: { mode: "local" } }),
+  );
+  await page.route("**/api/owner/upload", (r) =>
+    r.fulfill({ json: { url: "/api/media/owner-camera.png", kind: "IMAGE" } }),
+  );
+  await page.goto(url + "/owner/post?edit=" + property.id);
+  await page.getByRole("button", { name: /Continue to details/ }).click();
+  await page.getByRole("button", { name: /Continue to pricing/ }).click();
+  await page.getByRole("button", { name: "Take photo", exact: true }).click();
+  await expect(
+    page.getByRole("button", { name: "Capture photo", exact: true }),
+  ).toBeEnabled();
+  await page
+    .getByRole("button", { name: "Capture photo", exact: true })
+    .click();
+  await expect(
+    page.getByRole("button", { name: "Remove photo", exact: true }),
+  ).toHaveCount(4);
+  await page.getByRole("button", { name: "Save changes", exact: true }).click();
+  await expect
+    .poll(() => db.media.count({ where: { propertyId: property.id } }))
+    .toBe(4);
   assert.equal(
     await form.getByRole("button", { name: "Post another property" }).count(),
     0,
@@ -198,7 +240,7 @@ try {
     403,
   );
   console.log(
-    "PASS: owner-created single-use link, anonymous full-form publishing once, consumed-link rejection, media persistence, customer auto refresh, private submitter details, notifications and revocation.",
+    "PASS: owner-created single-use link, anonymous full-form publishing once, consumed-link rejection, camera capture and media persistence, customer auto refresh, private submitter details, notifications and revocation.",
   );
 } finally {
   await browser?.close();

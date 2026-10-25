@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import BackBar from "@/components/BackBar";
 import Sheet from "@/components/Sheet";
+import CameraPhoto from "@/components/CameraPhoto";
 import MiniMap from "@/components/MiniMap";
 import { Card, Icon, Pill, btn, cx, inputCls } from "@/components/ui";
 import { submitInvitedProperty } from "@/app/actions/posting-links";
@@ -219,7 +220,7 @@ export default function PostWizard({ initial, id: initialId, inviteToken }) {
 
   async function upload(files, kind) {
     setErr("");
-    const list = [...files];
+    const list = [...(files || [])];
     if (kind === "IMAGE" && images.length + list.length > MAX_PHOTOS)
       return setErr(`You can add up to ${MAX_PHOTOS} photos.`);
     setUploading((n) => n + list.length);
@@ -1003,12 +1004,21 @@ export default function PostWizard({ initial, id: initialId, inviteToken }) {
               />
               <button
                 type="button"
+                disabled={
+                  pending || uploading > 0 || images.length >= MAX_PHOTOS
+                }
                 onClick={() => photoRef.current?.click()}
                 className={btn("outline", "w-full")}
               >
                 <Icon name="camera" className="h-4 w-4" />
                 Add photos
               </button>
+              <CameraPhoto
+                disabled={
+                  pending || uploading > 0 || images.length >= MAX_PHOTOS
+                }
+                onPhoto={(file) => upload([file], "IMAGE")}
+              />
               {video ? (
                 <div className="space-y-2">
                   <video
