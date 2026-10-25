@@ -68,6 +68,7 @@ model User {
   name          String?
   role          Role           @default(BUYER)
   createdAt     DateTime       @default(now())
+  postingLinks  PostingLink[]
   properties    Property[]
   inquiries     Inquiry[]
   saved         Saved[]
@@ -146,6 +147,7 @@ model Property {
   inquiries     Inquiry[]
   saved         Saved[]
 
+  submission PropertySubmission?
   privateDetails PropertyPrivateDetails?
   @@index([status, purpose, city])
 }
@@ -364,4 +366,25 @@ model Testimonial {
   sort Int @default(0)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model PostingLink {
+ id Int @id @default(autoincrement())
+ token String @unique
+ label String
+ ownerId Int
+ owner User @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+ active Boolean @default(true)
+ createdAt DateTime @default(now())
+ submissions PropertySubmission[]
+}
+model PropertySubmission {
+ propertyId Int @id
+ property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+ linkId Int
+ link PostingLink @relation(fields: [linkId], references: [id])
+ name String
+ phone String
+ email String?
+ createdAt DateTime @default(now())
 }

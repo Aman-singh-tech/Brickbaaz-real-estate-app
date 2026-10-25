@@ -6,6 +6,7 @@ import { Icon } from "@/components/ui";
 
 const links = [
   ["Dashboard", "/owner/dashboard", "home"],
+  ["Posting links", "/owner/posting-links", "plus"],
   ["Properties", "/owner/listings", "list"],
   ["Builder projects", "/owner/projects", "home"],
   ["Property inquiries", "/owner/inquiries", "chat"],

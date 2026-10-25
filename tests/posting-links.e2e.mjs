@@ -1,0 +1,177 @@
+import "dotenv/config";
+import assert from "node:assert/strict";
+import crypto from "node:crypto";
+import { spawn, spawnSync } from "node:child_process";
+import { PrismaClient } from "@prisma/client";
+import { chromium, expect } from "@playwright/test";
+const schema = `bb_invite_test_${Date.now()}`;
+const database = new URL(process.env.DATABASE_URL);
+assert.ok(
+  ["localhost", "127.0.0.1", "::1"].includes(database.hostname),
+  "Local test DB required",
+);
+database.searchParams.set("schema", schema);
+const secret = crypto.randomBytes(32).toString("hex"),
+  url = "http://127.0.0.1:3430";
+const env = {
+  ...process.env,
+  DATABASE_URL: database.toString(),
+  SESSION_SECRET: secret,
+  OWNER_HOST: "",
+  APP_URL: url,
+  CLOUDINARY_CLOUD_NAME: "",
+  CLOUDINARY_API_KEY: "",
+  CLOUDINARY_API_SECRET: "",
+};
+const db = new PrismaClient({
+  datasources: { db: { url: database.toString() } },
+});
+let server, browser;
+try {
+  const migration = spawnSync(
+    process.execPath,
+    ["node_modules/prisma/build/index.js", "migrate", "deploy"],
+    { env, encoding: "utf8" },
+  );
+  assert.equal(migration.status, 0, migration.stderr);
+  const owner = await db.user.create({
+    data: { role: "OWNER", email: "invite-owner@example.test" },
+  });
+  server = spawn(
+    process.execPath,
+    ["node_modules/next/dist/bin/next", "start", "-p", "3430"],
+    { env, stdio: "ignore" },
+  );
+  for (let i = 0; i < 80; i++) {
+    try {
+      if ((await fetch(url)).ok) break;
+    } catch {}
+    await new Promise((r) => setTimeout(r, 500));
+  }
+  browser = await chromium.launch();
+  const admin = await browser.newContext();
+  const body = Buffer.from(
+    JSON.stringify({ uid: owner.id, kind: "OWNER", exp: Date.now() + 3600000 }),
+  ).toString("base64url");
+  await admin.addCookies([
+    {
+      name: "bb_owner",
+      value: `${body}.${crypto.createHmac("sha256", secret).update(body).digest("base64url")}`,
+      url,
+    },
+  ]);
+  const page = await admin.newPage();
+  await page.goto(url + "/owner/posting-links");
+  await page.getByLabel("Link label").fill("Builder invite");
+  await page.getByRole("button", { name: "Create posting link" }).click();
+  const linkInput = page.getByLabel("Posting link");
+  await expect(linkInput).toHaveCount(1);
+  const inviteUrl = await linkInput.inputValue();
+  const guest = await browser.newContext(),
+    form = await guest.newPage(),
+    customer = await guest.newPage();
+  await customer.goto(url + "/search");
+  await form.route("**/api/posting/*/upload-sign", (r) =>
+    r.fulfill({ json: { mode: "local" } }),
+  );
+  let uploads = 0;
+  await form.route("**/api/posting/*/upload", (r) =>
+    r.fulfill({
+      json: { url: `/api/media/invite-${++uploads}.png`, kind: "IMAGE" },
+    }),
+  );
+  await form.goto(inviteUrl);
+  await expect(form.locator('meta[name="robots"]')).toHaveAttribute(
+    "content",
+    /noindex/,
+  );
+  assert.equal(
+    (
+      await guest.request.post(url + "/api/posting/invalid/upload-sign")
+    ).status(),
+    403,
+  );
+  const privateName = "PrivateSubmitterXYZ",
+    privatePhone = "9876501234";
+  async function submit(title) {
+    await form.getByLabel("Your name", { exact: true }).fill(privateName);
+    await form.getByLabel("Your phone number").fill(privatePhone);
+    await form.getByLabel("Property title").fill(title);
+    await form.getByLabel("City", { exact: true }).fill("Gurugram");
+    await form.getByLabel("Locality", { exact: true }).fill("Sector 67");
+    await form.getByRole("button", { name: /Continue to details/ }).click();
+    await form
+      .getByLabel("Private Builder Details / Remarks")
+      .fill("CONFIDENTIAL-BUILDER-DETAILS");
+    await form.getByRole("button", { name: /Continue to pricing/ }).click();
+    await form.getByLabel("Expected price").fill("15000000");
+    await form.locator('input[type="file"][multiple]').setInputFiles([
+      { name: "a.png", mimeType: "image/png", buffer: Buffer.from("photo") },
+      { name: "b.png", mimeType: "image/png", buffer: Buffer.from("photo") },
+    ]);
+    await expect(
+      form.getByRole("button", { name: /Publish listing/ }),
+    ).toBeEnabled();
+    await form.getByLabel("I confirm these details are correct.").check();
+    await form.getByRole("button", { name: /Publish listing/ }).click();
+    await expect(
+      form.getByRole("heading", { name: "Your property is published" }),
+    ).toBeVisible({ timeout: 20000 });
+  }
+  await submit("Invited Home One");
+  const property = await db.property.findFirst({
+    where: { title: "Invited Home One" },
+    include: { submission: true, media: true },
+  });
+  assert.equal(property.status, "ACTIVE");
+  assert.equal(property.ownerId, owner.id);
+  assert.equal(property.submission.phone, privatePhone);
+  assert.equal(property.media.length, 2);
+  await expect(
+    customer.getByText("Invited Home One", { exact: true }).first(),
+  ).toBeVisible({ timeout: 20000 });
+  await page.goto(url + "/owner/listings");
+  await expect(
+    page.getByText(`Submitted by ${privateName}`, { exact: true }),
+  ).toBeVisible();
+  for (const path of ["/", "/search", `/property/${property.id}`]) {
+    const html = await (await guest.request.get(url + path)).text();
+    assert.ok(
+      !html.includes(privateName) &&
+        !html.includes(privatePhone) &&
+        !html.includes("CONFIDENTIAL-BUILDER-DETAILS"),
+      "Private data leak " + path,
+    );
+  }
+  await form.getByRole("button", { name: "Post another property" }).click();
+  await submit("Invited Home Two");
+  assert.equal(await db.propertySubmission.count(), 2);
+  assert.equal(
+    await db.notification.count({
+      where: { userId: owner.id, title: "Property submitted" },
+    }),
+    2,
+  );
+  await page.goto(url + "/owner/posting-links");
+  await page.getByRole("button", { name: "Disable link" }).click();
+  await expect(page.getByText(/Disabled/)).toBeVisible();
+  await form.goto(inviteUrl);
+  await expect(
+    form.getByRole("heading", { name: "Posting link unavailable" }),
+  ).toBeVisible();
+  const token = inviteUrl.split("/").pop();
+  assert.equal(
+    (
+      await guest.request.post(url + `/api/posting/${token}/upload-sign`)
+    ).status(),
+    403,
+  );
+  console.log(
+    "PASS: owner-created reusable link, anonymous full-form publishing twice, media persistence, customer auto refresh, private submitter details, notifications and revocation.",
+  );
+} finally {
+  await browser?.close();
+  server?.kill();
+  await db.$executeRawUnsafe(`DROP SCHEMA IF EXISTS "${schema}" CASCADE`);
+  await db.$disconnect();
+}

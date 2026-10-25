@@ -6,28 +6,84 @@ import BackBar from "@/components/BackBar";
 import Sheet from "@/components/Sheet";
 import MiniMap from "@/components/MiniMap";
 import { Card, Icon, Pill, btn, cx, inputCls } from "@/components/ui";
+import { submitInvitedProperty } from "@/app/actions/posting-links";
+import Link from "next/link";
 import { saveProperty } from "@/app/actions/owner";
-import { AMENITIES, CITIES, CITY_COORDS, FACING, FURNISHING, TYPE_LABEL, formatInr, imgUrl } from "@/lib/format";
+import {
+  AMENITIES,
+  CITIES,
+  CITY_COORDS,
+  FACING,
+  FURNISHING,
+  TYPE_LABEL,
+  formatInr,
+  imgUrl,
+} from "@/lib/format";
 
-const STEPS = [["Basic info", "Type & place"], ["Details", "BHK & area"], ["Pricing", "Price & media"]];
+const STEPS = [
+  ["Basic info", "Type & place"],
+  ["Details", "BHK & area"],
+  ["Pricing", "Price & media"],
+];
 const MAX_PHOTOS = 20;
 
 const EMPTY = {
-  purpose: "SALE", type: "APARTMENT", title: "", city: "", state: "", locality: "", society: "", lat: "", lng: "",
-  bedrooms: 2, bathrooms: 2, balconies: 1, carpetArea: "", superArea: "", floor: "", totalFloors: "",
-  furnishing: "Semi-Furnished", facing: "", possession: "READY", possessionBy: "", amenities: [],
-  nearby: [{ label: "", distance: "" }, { label: "", distance: "" }, { label: "", distance: "" }],
-  description: "", builderRemarks: "", reraId: "", price: "", negotiable: false, deposit: "", media: [], confirmed: false,
+  purpose: "SALE",
+  type: "APARTMENT",
+  title: "",
+  city: "",
+  state: "",
+  locality: "",
+  society: "",
+  lat: "",
+  lng: "",
+  bedrooms: 2,
+  bathrooms: 2,
+  balconies: 1,
+  carpetArea: "",
+  superArea: "",
+  floor: "",
+  totalFloors: "",
+  furnishing: "Semi-Furnished",
+  facing: "",
+  possession: "READY",
+  possessionBy: "",
+  amenities: [],
+  nearby: [
+    { label: "", distance: "" },
+    { label: "", distance: "" },
+    { label: "", distance: "" },
+  ],
+  description: "",
+  builderRemarks: "",
+  reraId: "",
+  price: "",
+  negotiable: false,
+  deposit: "",
+  media: [],
+  confirmed: false,
 };
 
 function Chip({ on, children, ...p }) {
   return (
-    <button type="button" aria-pressed={on} className={cx("rounded-full px-4 py-2.5 text-[13px] font-bold", on ? "bg-navy text-white" : "bg-fill text-ink")} {...p}>
+    <button
+      type="button"
+      aria-pressed={on}
+      className={cx(
+        "rounded-full px-4 py-2.5 text-[13px] font-bold",
+        on ? "bg-navy text-white" : "bg-fill text-ink",
+      )}
+      {...p}
+    >
       {children}
     </button>
   );
 }
-const Label = ({ children }) => <span className="mb-1.5 block text-[11px] font-bold text-mute">{children}</span>;
+const Label = ({ children }) => (
+  <span className="mb-1.5 block text-[11px] font-bold text-mute">
+    {children}
+  </span>
+);
 
 // Resize big phone photos before upload (max 1600px, JPEG 85%).
 async function shrink(file) {
@@ -46,8 +102,10 @@ async function shrink(file) {
   }
 }
 
-export default function PostWizard({ initial, id: initialId }) {
+export default function PostWizard({ initial, id: initialId, inviteToken }) {
   const router = useRouter();
+  const [contact, setContact] = useState({ name: "", phone: "", email: "" });
+  const [submitted, setSubmitted] = useState(null);
   const [id, setId] = useState(initialId ?? null);
   const [step, setStep] = useState(1);
   const [d, setD] = useState({ ...EMPTY, ...(initial ?? {}) });
@@ -81,7 +139,7 @@ export default function PostWizard({ initial, id: initialId }) {
       try {
         const res = await fetch(
           `https://nominatim.openstreetmap.org/search?format=jsonv2&addressdetails=1&limit=6&countrycodes=in&q=${encodeURIComponent(text)}`,
-          { signal: ctl.signal, headers: { "Accept-Language": "en" } }
+          { signal: ctl.signal, headers: { "Accept-Language": "en" } },
         );
         setHits(res.ok ? await res.json() : []);
       } catch {
@@ -98,8 +156,16 @@ export default function PostWizard({ initial, id: initialId }) {
 
   function pickPlace(h) {
     const a = h.address ?? {};
-    const city = a.city || a.town || a.village || a.state_district || a.county || "";
-    const locality = a.suburb || a.neighbourhood || a.city_district || a.quarter || a.road || h.name || "";
+    const city =
+      a.city || a.town || a.village || a.state_district || a.county || "";
+    const locality =
+      a.suburb ||
+      a.neighbourhood ||
+      a.city_district ||
+      a.quarter ||
+      a.road ||
+      h.name ||
+      "";
     setD((x) => ({
       ...x,
       city: city || x.city,
@@ -114,8 +180,15 @@ export default function PostWizard({ initial, id: initialId }) {
 
   function checkStep(n) {
     if (n === 1) {
+      if (
+        inviteToken &&
+        (!contact.name.trim() ||
+          !/^\d{10,15}$/.test(contact.phone.replace(/\D/g, "")))
+      )
+        return "Enter your name and valid phone number.";
       if (!d.title.trim()) return "Add a property title.";
-      if (!d.city || !d.locality.trim()) return "City and locality are required.";
+      if (!d.city || !d.locality.trim())
+        return "City and locality are required.";
     }
     if (n === 3) {
       if (!d.price || Number(d.price) <= 0) return "Enter the price.";
@@ -137,14 +210,24 @@ export default function PostWizard({ initial, id: initialId }) {
   async function upload(files, kind) {
     setErr("");
     const list = [...files];
-    if (kind === "IMAGE" && images.length + list.length > MAX_PHOTOS) return setErr(`You can add up to ${MAX_PHOTOS} photos.`);
+    if (kind === "IMAGE" && images.length + list.length > MAX_PHOTOS)
+      return setErr(`You can add up to ${MAX_PHOTOS} photos.`);
     setUploading((n) => n + list.length);
     for (const f of list) {
       try {
         const file = kind === "IMAGE" ? await shrink(f) : f;
-        if (kind === "IMAGE" && file.size > 8 * 1024 * 1024) throw new Error("Image must be under 8 MB.");
-        if (kind === "VIDEO" && file.size > 80 * 1024 * 1024) throw new Error("Video must be under 80 MB.");
-        const ticket = await (await fetch("/api/owner/upload-sign", { method: "POST" })).json();
+        if (kind === "IMAGE" && file.size > 8 * 1024 * 1024)
+          throw new Error("Image must be under 8 MB.");
+        if (kind === "VIDEO" && file.size > 80 * 1024 * 1024)
+          throw new Error("Video must be under 80 MB.");
+        const ticket = await (
+          await fetch(
+            inviteToken
+              ? `/api/posting/${inviteToken}/upload-sign`
+              : "/api/owner/upload-sign",
+            { method: "POST" },
+          )
+        ).json();
         if (ticket.error) throw new Error(ticket.error);
         let out;
         if (ticket.mode === "cloudinary") {
@@ -155,19 +238,33 @@ export default function PostWizard({ initial, id: initialId }) {
           body.append("timestamp", ticket.timestamp);
           body.append("signature", ticket.signature);
           body.append("folder", ticket.folder);
-          const res = await fetch(`https://api.cloudinary.com/v1_1/${ticket.cloud}/${kind === "VIDEO" ? "video" : "image"}/upload`, { method: "POST", body });
+          const res = await fetch(
+            `https://api.cloudinary.com/v1_1/${ticket.cloud}/${kind === "VIDEO" ? "video" : "image"}/upload`,
+            { method: "POST", body },
+          );
           const json = await res.json();
           if (!res.ok) throw new Error(json.error?.message || "Upload failed");
           out = { url: json.secure_url, kind };
         } else {
           const body = new FormData();
           body.append("file", file);
-          const res = await fetch("/api/owner/upload", { method: "POST", body });
+          const res = await fetch(
+            inviteToken
+              ? `/api/posting/${inviteToken}/upload`
+              : "/api/owner/upload",
+            { method: "POST", body },
+          );
           const json = await res.json();
           if (!res.ok) throw new Error(json.error || "Upload failed");
           out = { url: json.url, kind: json.kind };
         }
-        setD((x) => ({ ...x, media: [...x.media.filter((m) => !(kind === "VIDEO" && m.kind === "VIDEO")), out] }));
+        setD((x) => ({
+          ...x,
+          media: [
+            ...x.media.filter((m) => !(kind === "VIDEO" && m.kind === "VIDEO")),
+            out,
+          ],
+        }));
       } catch (e) {
         setErr(e.message || "Upload failed. Try again.");
       } finally {
@@ -176,14 +273,22 @@ export default function PostWizard({ initial, id: initialId }) {
     }
   }
 
-  const removeMedia = (url) => set("media", d.media.filter((m) => m.url !== url));
+  const removeMedia = (url) =>
+    set(
+      "media",
+      d.media.filter((m) => m.url !== url),
+    );
   const makeCover = (url) => {
     const pick = d.media.find((m) => m.url === url);
     set("media", [pick, ...d.media.filter((m) => m.url !== url)]);
   };
 
   function submit(publish) {
-    const e = publish ? checkStep(1) || checkStep(3) : !d.title.trim() ? "Add a title before saving a draft." : "";
+    const e = publish
+      ? checkStep(1) || checkStep(3)
+      : !d.title.trim()
+        ? "Add a title before saving a draft."
+        : "";
     if (e) {
       setErr(e);
       if (publish && !checkStep(1)) setStep(3);
@@ -193,10 +298,22 @@ export default function PostWizard({ initial, id: initialId }) {
     setErr("");
     setNotice("");
     start(async () => {
-      const res = await saveProperty(id, d, publish);
+      let res;
+      try {
+        res = inviteToken
+          ? await submitInvitedProperty(inviteToken, d, contact)
+          : await saveProperty(id, d, publish);
+      } catch {
+        setErr("Unable to save. Please try again.");
+        return;
+      }
       if (res?.error) {
         setErr(res.error);
         if (res.step) setStep(res.step);
+        return;
+      }
+      if (inviteToken) {
+        setSubmitted(res.id);
         return;
       }
       setId(res.id);
@@ -207,95 +324,275 @@ export default function PostWizard({ initial, id: initialId }) {
 
   function useMyLocation() {
     navigator.geolocation?.getCurrentPosition(
-      (p) => setD((x) => ({ ...x, lat: p.coords.latitude, lng: p.coords.longitude })),
+      (p) =>
+        setD((x) => ({
+          ...x,
+          lat: p.coords.latitude,
+          lng: p.coords.longitude,
+        })),
       () => setErr("Could not read your location. Tap the map to set the pin."),
-      { enableHighAccuracy: true, timeout: 8000 }
+      { enableHighAccuracy: true, timeout: 8000 },
     );
   }
 
+  if (submitted)
+    return (
+      <Card className="m-5 space-y-5">
+        <h1 className="text-2xl font-bold">Your property is published</h1>
+        <p>
+          Brickbaaz has received your property and contact details. Your listing
+          is available to customers through matching location and search
+          filters.
+        </p>
+        <Link href={`/property/${submitted}`} className={btn("primary")}>
+          View property
+        </Link>
+        <button
+          className={btn("brand")}
+          onClick={() => {
+            setSubmitted(null);
+            setD({ ...EMPTY });
+            setStep(1);
+          }}
+        >
+          Post another property
+        </button>
+      </Card>
+    );
   return (
     <>
-      <BackBar owner title={id ? "Edit listing" : "Post Property"} fallback="/owner/dashboard" />
+      {!inviteToken && (
+        <BackBar
+          owner
+          title={id ? "Edit listing" : "Post Property"}
+          fallback="/owner/dashboard"
+        />
+      )}
       <div className="flex-1 space-y-4 px-4 pb-6 pt-4">
         <div className="space-y-1">
           <Pill tone="brand">FREE LISTING</Pill>
-          <h1 className="text-2xl font-extrabold tracking-tight">{id ? "Update your listing" : "List property for free"}</h1>
-          <p className="text-sm text-mute">Fill the basics, set the price and add photos. Your listing goes live for buyers immediately.</p>
+          <h1 className="text-2xl font-extrabold tracking-tight">
+            {id ? "Update your listing" : "List property for free"}
+          </h1>
+          <p className="text-sm text-mute">
+            Fill the basics, set the price and add photos. Your listing goes
+            live for buyers immediately.
+          </p>
         </div>
 
         <div className="rounded-2xl bg-white p-2 ring-1 ring-line">
           <div className="grid grid-cols-3 gap-1.5">
             {STEPS.map(([t, s], i) => (
-              <button key={t} type="button" onClick={() => i + 1 < step && setStep(i + 1)} className={cx("rounded-xl px-2.5 py-2 text-left", step === i + 1 ? "bg-navy text-white" : "text-mute")}>
-                <span className="block text-[12px] font-extrabold">{i + 1} {t}</span>
+              <button
+                key={t}
+                type="button"
+                onClick={() => i + 1 < step && setStep(i + 1)}
+                className={cx(
+                  "rounded-xl px-2.5 py-2 text-left",
+                  step === i + 1 ? "bg-navy text-white" : "text-mute",
+                )}
+              >
+                <span className="block text-[12px] font-extrabold">
+                  {i + 1} {t}
+                </span>
                 <span className="block text-[10px] opacity-70">{s}</span>
               </button>
             ))}
           </div>
-          <div className="mx-1 mt-2 h-1 overflow-hidden rounded-full bg-fill"><div className="h-full rounded-full bg-navy transition-all" style={{ width: `${(step / 3) * 100}%` }} /></div>
+          <div className="mx-1 mt-2 h-1 overflow-hidden rounded-full bg-fill">
+            <div
+              className="h-full rounded-full bg-navy transition-all"
+              style={{ width: `${(step / 3) * 100}%` }}
+            />
+          </div>
         </div>
 
+        {inviteToken && step === 1 && (
+          <Card className="space-y-3">
+            <h2 className="font-bold">
+              Your contact details (private to Brickbaaz)
+            </h2>
+            {[
+              ["name", "Your name"],
+              ["phone", "Your phone number"],
+              ["email", "Your email (optional)"],
+            ].map(([key, label]) => (
+              <label key={key} className="block text-sm">
+                {label}
+                <input
+                  type={
+                    key === "email" ? "email" : key === "phone" ? "tel" : "text"
+                  }
+                  value={contact[key]}
+                  maxLength={key === "email" ? 254 : 100}
+                  onChange={(e) =>
+                    setContact((c) => ({ ...c, [key]: e.target.value }))
+                  }
+                  className={inputCls}
+                />
+              </label>
+            ))}
+          </Card>
+        )}
         {step === 1 && (
           <>
             <Card className="space-y-2.5">
               <Label>I want to</Label>
               <div className="grid grid-cols-2 gap-1 rounded-xl bg-fill p-1 text-[13px] font-bold">
-                {[["SALE", "Sell / Resale"], ["RENT", "Rent / Lease"]].map(([v, l]) => (
-                  <button key={v} type="button" aria-pressed={d.purpose === v} onClick={() => set("purpose", v)} className={cx("rounded-lg py-2.5", d.purpose === v ? "bg-navy text-white" : "text-mute")}>{l}</button>
+                {[
+                  ["SALE", "Sell / Resale"],
+                  ["RENT", "Rent / Lease"],
+                ].map(([v, l]) => (
+                  <button
+                    key={v}
+                    type="button"
+                    aria-pressed={d.purpose === v}
+                    onClick={() => set("purpose", v)}
+                    className={cx(
+                      "rounded-lg py-2.5",
+                      d.purpose === v ? "bg-navy text-white" : "text-mute",
+                    )}
+                  >
+                    {l}
+                  </button>
                 ))}
               </div>
             </Card>
             <Card className="space-y-2.5">
               <Label>Property type</Label>
               <div className="flex flex-wrap gap-2">
-                {Object.entries(TYPE_LABEL).map(([v, l]) => <Chip key={v} on={d.type === v} onClick={() => set("type", v)}>{l}</Chip>)}
+                {Object.entries(TYPE_LABEL).map(([v, l]) => (
+                  <Chip
+                    key={v}
+                    on={d.type === v}
+                    onClick={() => set("type", v)}
+                  >
+                    {l}
+                  </Chip>
+                ))}
               </div>
             </Card>
             <Card className="space-y-2">
-              <label><Label>Property title</Label>
-                <input value={d.title} onChange={(e) => set("title", e.target.value)} maxLength={120} placeholder="e.g. 3 BHK sea-facing flat in Bandra" className={inputCls} />
+              <label>
+                <Label>Property title</Label>
+                <input
+                  value={d.title}
+                  onChange={(e) => set("title", e.target.value)}
+                  maxLength={120}
+                  placeholder="e.g. 3 BHK sea-facing flat in Bandra"
+                  className={inputCls}
+                />
               </label>
-              <p className="text-[11.5px] text-mute">💡 A descriptive title attracts more inquiries.</p>
+              <p className="text-[11.5px] text-mute">
+                💡 A descriptive title attracts more inquiries.
+              </p>
             </Card>
             <Card className="space-y-3">
               <h2 className="text-[14px] font-extrabold">Location details</h2>
               <div className="relative">
                 <Label>Search location (area, sector, society or city)</Label>
-                <input value={q} onChange={(e) => { setQ(e.target.value); if (e.target.value.trim().length < 3) setHits([]); }} placeholder="e.g. Sector 56 Gurugram" autoComplete="off" className={inputCls} />
+                <input
+                  value={q}
+                  onChange={(e) => {
+                    setQ(e.target.value);
+                    if (e.target.value.trim().length < 3) setHits([]);
+                  }}
+                  placeholder="e.g. Sector 56 Gurugram"
+                  autoComplete="off"
+                  className={inputCls}
+                />
                 {(searching || hits.length > 0) && (
                   <ul className="absolute inset-x-0 top-full z-20 mt-1 max-h-60 overflow-y-auto rounded-xl border border-line bg-white shadow-lg">
-                    {searching && hits.length === 0 && <li className="px-3.5 py-3 text-xs text-mute">Searching…</li>}
+                    {searching && hits.length === 0 && (
+                      <li className="px-3.5 py-3 text-xs text-mute">
+                        Searching…
+                      </li>
+                    )}
                     {hits.map((h) => (
                       <li key={h.place_id}>
-                        <button type="button" onClick={() => pickPlace(h)} className="block w-full px-3.5 py-2.5 text-left text-[13px] hover:bg-fill">
-                          <span className="font-bold">{h.name || h.display_name.split(",")[0]}</span>
-                          <span className="block truncate text-[11px] text-mute">{h.display_name}</span>
+                        <button
+                          type="button"
+                          onClick={() => pickPlace(h)}
+                          className="block w-full px-3.5 py-2.5 text-left text-[13px] hover:bg-fill"
+                        >
+                          <span className="font-bold">
+                            {h.name || h.display_name.split(",")[0]}
+                          </span>
+                          <span className="block truncate text-[11px] text-mute">
+                            {h.display_name}
+                          </span>
                         </button>
                       </li>
                     ))}
                   </ul>
                 )}
-                <p className="mt-1 text-[11px] text-mute">Pick a result to fill the city, area and map pin. You can also type them below.</p>
+                <p className="mt-1 text-[11px] text-mute">
+                  Pick a result to fill the city, area and map pin. You can also
+                  type them below.
+                </p>
               </div>
               <div className="grid grid-cols-2 gap-3">
-                <label><Label>City</Label>
-                  <input value={d.city} list="city-list" onChange={(e) => set("city", e.target.value)} maxLength={60} placeholder="e.g. Gurugram" className={inputCls} />
-                  <datalist id="city-list">{CITIES.map((c) => <option key={c.name} value={c.name} />)}</datalist>
+                <label>
+                  <Label>City</Label>
+                  <input
+                    value={d.city}
+                    list="city-list"
+                    onChange={(e) => set("city", e.target.value)}
+                    maxLength={60}
+                    placeholder="e.g. Gurugram"
+                    className={inputCls}
+                  />
+                  <datalist id="city-list">
+                    {CITIES.map((c) => (
+                      <option key={c.name} value={c.name} />
+                    ))}
+                  </datalist>
                 </label>
-                <label><Label>State (optional)</Label>
-                  <input value={d.state} onChange={(e) => set("state", e.target.value)} maxLength={60} placeholder="e.g. Haryana" className={inputCls} />
+                <label>
+                  <Label>State (optional)</Label>
+                  <input
+                    value={d.state}
+                    onChange={(e) => set("state", e.target.value)}
+                    maxLength={60}
+                    placeholder="e.g. Haryana"
+                    className={inputCls}
+                  />
                 </label>
               </div>
-              <label><Label>Locality</Label>
-                <input value={d.locality} onChange={(e) => set("locality", e.target.value)} maxLength={120} placeholder="e.g. Sector 56 / Bandra West" className={inputCls} />
+              <label>
+                <Label>Locality</Label>
+                <input
+                  value={d.locality}
+                  onChange={(e) => set("locality", e.target.value)}
+                  maxLength={120}
+                  placeholder="e.g. Sector 56 / Bandra West"
+                  className={inputCls}
+                />
               </label>
-              <label><Label>Society / project name (optional)</Label>
-                <input value={d.society} onChange={(e) => set("society", e.target.value)} maxLength={120} placeholder="e.g. Palm Grove Apartments" className={inputCls} />
+              <label>
+                <Label>Society / project name (optional)</Label>
+                <input
+                  value={d.society}
+                  onChange={(e) => set("society", e.target.value)}
+                  maxLength={120}
+                  placeholder="e.g. Palm Grove Apartments"
+                  className={inputCls}
+                />
               </label>
               <div className="flex items-center gap-3 rounded-xl bg-fill px-3.5 py-3">
                 <Icon name="pin" className="h-5 w-5 shrink-0" />
-                <p className="min-w-0 flex-1 text-xs font-semibold">{d.lat !== "" ? `Pin set (${Number(d.lat).toFixed(4)}, ${Number(d.lng).toFixed(4)})` : "Pin location on map for exact accuracy"}</p>
-                <button type="button" onClick={() => setPinOpen(true)} className={btn("primary", "!px-3.5 !py-2 text-xs")}>{d.lat !== "" ? "Change" : "Set pin"}</button>
+                <p className="min-w-0 flex-1 text-xs font-semibold">
+                  {d.lat !== ""
+                    ? `Pin set (${Number(d.lat).toFixed(4)}, ${Number(d.lng).toFixed(4)})`
+                    : "Pin location on map for exact accuracy"}
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setPinOpen(true)}
+                  className={btn("primary", "!px-3.5 !py-2 text-xs")}
+                >
+                  {d.lat !== "" ? "Change" : "Set pin"}
+                </button>
               </div>
             </Card>
           </>
@@ -306,57 +603,272 @@ export default function PostWizard({ initial, id: initialId }) {
             {!land && (
               <Card className="space-y-3">
                 {!comm && (
-                  <div><Label>Bedrooms</Label><div className="flex flex-wrap gap-2">{[1, 2, 3, 4, 5].map((n) => <Chip key={n} on={d.bedrooms === n} onClick={() => set("bedrooms", n)}>{n === 5 ? "5+" : n}</Chip>)}</div></div>
+                  <div>
+                    <Label>Bedrooms</Label>
+                    <div className="flex flex-wrap gap-2">
+                      {[1, 2, 3, 4, 5].map((n) => (
+                        <Chip
+                          key={n}
+                          on={d.bedrooms === n}
+                          onClick={() => set("bedrooms", n)}
+                        >
+                          {n === 5 ? "5+" : n}
+                        </Chip>
+                      ))}
+                    </div>
+                  </div>
                 )}
-                <div><Label>{comm ? "Washrooms" : "Bathrooms"}</Label><div className="flex flex-wrap gap-2">{[1, 2, 3, 4].map((n) => <Chip key={n} on={d.bathrooms === n} onClick={() => set("bathrooms", n)}>{n === 4 ? "4+" : n}</Chip>)}</div></div>
-                {!comm && <div><Label>Balconies</Label><div className="flex flex-wrap gap-2">{[0, 1, 2, 3].map((n) => <Chip key={n} on={d.balconies === n} onClick={() => set("balconies", n)}>{n === 3 ? "3+" : n}</Chip>)}</div></div>}
+                <div>
+                  <Label>{comm ? "Washrooms" : "Bathrooms"}</Label>
+                  <div className="flex flex-wrap gap-2">
+                    {[1, 2, 3, 4].map((n) => (
+                      <Chip
+                        key={n}
+                        on={d.bathrooms === n}
+                        onClick={() => set("bathrooms", n)}
+                      >
+                        {n === 4 ? "4+" : n}
+                      </Chip>
+                    ))}
+                  </div>
+                </div>
+                {!comm && (
+                  <div>
+                    <Label>Balconies</Label>
+                    <div className="flex flex-wrap gap-2">
+                      {[0, 1, 2, 3].map((n) => (
+                        <Chip
+                          key={n}
+                          on={d.balconies === n}
+                          onClick={() => set("balconies", n)}
+                        >
+                          {n === 3 ? "3+" : n}
+                        </Chip>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </Card>
             )}
             <Card className="space-y-3">
               <div className="grid grid-cols-2 gap-3">
-                <label><Label>{land ? "Plot area (sq.ft)" : "Carpet area (sq.ft)"}</Label><input inputMode="numeric" value={d.carpetArea} onChange={(e) => set("carpetArea", e.target.value.replace(/\D/g, ""))} className={inputCls} /></label>
-                {!land && <label><Label>Super built-up (sq.ft)</Label><input inputMode="numeric" value={d.superArea} onChange={(e) => set("superArea", e.target.value.replace(/\D/g, ""))} className={inputCls} /></label>}
-                {land && <label><Label>Super area (sq.ft, optional)</Label><input inputMode="numeric" value={d.superArea} onChange={(e) => set("superArea", e.target.value.replace(/\D/g, ""))} className={inputCls} /></label>}
+                <label>
+                  <Label>
+                    {land ? "Plot area (sq.ft)" : "Carpet area (sq.ft)"}
+                  </Label>
+                  <input
+                    inputMode="numeric"
+                    value={d.carpetArea}
+                    onChange={(e) =>
+                      set("carpetArea", e.target.value.replace(/\D/g, ""))
+                    }
+                    className={inputCls}
+                  />
+                </label>
+                {!land && (
+                  <label>
+                    <Label>Super built-up (sq.ft)</Label>
+                    <input
+                      inputMode="numeric"
+                      value={d.superArea}
+                      onChange={(e) =>
+                        set("superArea", e.target.value.replace(/\D/g, ""))
+                      }
+                      className={inputCls}
+                    />
+                  </label>
+                )}
+                {land && (
+                  <label>
+                    <Label>Super area (sq.ft, optional)</Label>
+                    <input
+                      inputMode="numeric"
+                      value={d.superArea}
+                      onChange={(e) =>
+                        set("superArea", e.target.value.replace(/\D/g, ""))
+                      }
+                      className={inputCls}
+                    />
+                  </label>
+                )}
               </div>
               {!land && (
                 <div className="grid grid-cols-2 gap-3">
-                  <label><Label>Floor</Label><input inputMode="numeric" value={d.floor} onChange={(e) => set("floor", e.target.value.replace(/\D/g, ""))} className={inputCls} /></label>
-                  <label><Label>Total floors</Label><input inputMode="numeric" value={d.totalFloors} onChange={(e) => set("totalFloors", e.target.value.replace(/\D/g, ""))} className={inputCls} /></label>
+                  <label>
+                    <Label>Floor</Label>
+                    <input
+                      inputMode="numeric"
+                      value={d.floor}
+                      onChange={(e) =>
+                        set("floor", e.target.value.replace(/\D/g, ""))
+                      }
+                      className={inputCls}
+                    />
+                  </label>
+                  <label>
+                    <Label>Total floors</Label>
+                    <input
+                      inputMode="numeric"
+                      value={d.totalFloors}
+                      onChange={(e) =>
+                        set("totalFloors", e.target.value.replace(/\D/g, ""))
+                      }
+                      className={inputCls}
+                    />
+                  </label>
                 </div>
               )}
             </Card>
             <Card className="space-y-3">
-              {!land && <div><Label>Furnishing</Label><div className="flex flex-wrap gap-2">{FURNISHING.map((f) => <Chip key={f} on={d.furnishing === f} onClick={() => set("furnishing", f)}>{f}</Chip>)}</div></div>}
-              <div><Label>Facing</Label><div className="flex flex-wrap gap-2">{FACING.map((f) => <Chip key={f} on={d.facing === f} onClick={() => set("facing", d.facing === f ? "" : f)}>{f}</Chip>)}</div></div>
-              <div><Label>Possession</Label>
-                <div className="flex flex-wrap gap-2">{[["READY", "Ready to move"], ["UNDER_CONSTRUCTION", "Under construction"]].map(([v, l]) => <Chip key={v} on={d.possession === v} onClick={() => set("possession", v)}>{l}</Chip>)}</div>
-                {d.possession === "UNDER_CONSTRUCTION" && <input value={d.possessionBy} onChange={(e) => set("possessionBy", e.target.value)} placeholder="Possession by, e.g. Dec 2027" maxLength={30} className={`${inputCls} mt-2`} />}
+              {!land && (
+                <div>
+                  <Label>Furnishing</Label>
+                  <div className="flex flex-wrap gap-2">
+                    {FURNISHING.map((f) => (
+                      <Chip
+                        key={f}
+                        on={d.furnishing === f}
+                        onClick={() => set("furnishing", f)}
+                      >
+                        {f}
+                      </Chip>
+                    ))}
+                  </div>
+                </div>
+              )}
+              <div>
+                <Label>Facing</Label>
+                <div className="flex flex-wrap gap-2">
+                  {FACING.map((f) => (
+                    <Chip
+                      key={f}
+                      on={d.facing === f}
+                      onClick={() => set("facing", d.facing === f ? "" : f)}
+                    >
+                      {f}
+                    </Chip>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <Label>Possession</Label>
+                <div className="flex flex-wrap gap-2">
+                  {[
+                    ["READY", "Ready to move"],
+                    ["UNDER_CONSTRUCTION", "Under construction"],
+                  ].map(([v, l]) => (
+                    <Chip
+                      key={v}
+                      on={d.possession === v}
+                      onClick={() => set("possession", v)}
+                    >
+                      {l}
+                    </Chip>
+                  ))}
+                </div>
+                {d.possession === "UNDER_CONSTRUCTION" && (
+                  <input
+                    value={d.possessionBy}
+                    onChange={(e) => set("possessionBy", e.target.value)}
+                    placeholder="Possession by, e.g. Dec 2027"
+                    maxLength={30}
+                    className={`${inputCls} mt-2`}
+                  />
+                )}
               </div>
             </Card>
             <Card className="space-y-2.5">
               <Label>Amenities</Label>
               <div className="flex flex-wrap gap-2">
-                {AMENITIES.map((a) => <Chip key={a} on={d.amenities.includes(a)} onClick={() => set("amenities", d.amenities.includes(a) ? d.amenities.filter((x) => x !== a) : [...d.amenities, a])}>{a}</Chip>)}
+                {AMENITIES.map((a) => (
+                  <Chip
+                    key={a}
+                    on={d.amenities.includes(a)}
+                    onClick={() =>
+                      set(
+                        "amenities",
+                        d.amenities.includes(a)
+                          ? d.amenities.filter((x) => x !== a)
+                          : [...d.amenities, a],
+                      )
+                    }
+                  >
+                    {a}
+                  </Chip>
+                ))}
               </div>
             </Card>
             <Card className="space-y-2.5">
               <Label>Nearby places (optional)</Label>
               {d.nearby.map((n, i) => (
                 <div key={i} className="grid grid-cols-[1fr_6.5rem] gap-2">
-                  <input value={n.label} onChange={(e) => set("nearby", d.nearby.map((x, j) => (j === i ? { ...x, label: e.target.value } : x)))} placeholder={["Metro station", "Hospital", "Airport"][i]} maxLength={40} className={inputCls} />
-                  <input value={n.distance} onChange={(e) => set("nearby", d.nearby.map((x, j) => (j === i ? { ...x, distance: e.target.value } : x)))} placeholder="800 m" maxLength={20} className={inputCls} />
+                  <input
+                    value={n.label}
+                    onChange={(e) =>
+                      set(
+                        "nearby",
+                        d.nearby.map((x, j) =>
+                          j === i ? { ...x, label: e.target.value } : x,
+                        ),
+                      )
+                    }
+                    placeholder={["Metro station", "Hospital", "Airport"][i]}
+                    maxLength={40}
+                    className={inputCls}
+                  />
+                  <input
+                    value={n.distance}
+                    onChange={(e) =>
+                      set(
+                        "nearby",
+                        d.nearby.map((x, j) =>
+                          j === i ? { ...x, distance: e.target.value } : x,
+                        ),
+                      )
+                    }
+                    placeholder="800 m"
+                    maxLength={20}
+                    className={inputCls}
+                  />
                 </div>
               ))}
             </Card>
             <Card className="space-y-3">
-              <label><Label>Description</Label>
-                <textarea value={d.description} onChange={(e) => set("description", e.target.value)} rows={5} maxLength={3000} placeholder="Describe the home: layout, view, flooring, kitchen, what is nearby…" className={inputCls} />
+              <label>
+                <Label>Description</Label>
+                <textarea
+                  value={d.description}
+                  onChange={(e) => set("description", e.target.value)}
+                  rows={5}
+                  maxLength={3000}
+                  placeholder="Describe the home: layout, view, flooring, kitchen, what is nearby…"
+                  className={inputCls}
+                />
               </label>
-              <label><Label>RERA ID (optional)</Label><input value={d.reraId} onChange={(e) => set("reraId", e.target.value)} maxLength={40} className={inputCls} /></label>
-              <label><Label>Private Builder Details / Remarks</Label>
-                <textarea value={d.builderRemarks} onChange={(e) => set("builderRemarks", e.target.value)} rows={4} maxLength={3000} placeholder="Builder name, contact number and private notes about whose property this is…" className={inputCls} />
+              <label>
+                <Label>RERA ID (optional)</Label>
+                <input
+                  value={d.reraId}
+                  onChange={(e) => set("reraId", e.target.value)}
+                  maxLength={40}
+                  className={inputCls}
+                />
               </label>
-              <p className="text-xs leading-6 text-mute">Only visible in your owner app. These remarks are not part of the public property description.</p>
+              <label>
+                <Label>Private Builder Details / Remarks</Label>
+                <textarea
+                  value={d.builderRemarks}
+                  onChange={(e) => set("builderRemarks", e.target.value)}
+                  rows={4}
+                  maxLength={3000}
+                  placeholder="Builder name, contact number and private notes about whose property this is…"
+                  className={inputCls}
+                />
+              </label>
+              <p className="text-xs leading-6 text-mute">
+                Only visible in your owner app. These remarks are not part of
+                the public property description.
+              </p>
             </Card>
           </>
         )}
@@ -364,91 +876,285 @@ export default function PostWizard({ initial, id: initialId }) {
         {step === 3 && (
           <>
             <Card className="space-y-3">
-              <label><Label>{rent ? "Monthly rent (₹)" : "Expected price (₹)"}</Label>
-                <input inputMode="numeric" value={d.price} onChange={(e) => set("price", e.target.value.replace(/\D/g, "").slice(0, 10))} placeholder={rent ? "e.g. 38000" : "e.g. 37500000"} className={`${inputCls} text-lg font-extrabold`} />
+              <label>
+                <Label>
+                  {rent ? "Monthly rent (₹)" : "Expected price (₹)"}
+                </Label>
+                <input
+                  inputMode="numeric"
+                  value={d.price}
+                  onChange={(e) =>
+                    set("price", e.target.value.replace(/\D/g, "").slice(0, 10))
+                  }
+                  placeholder={rent ? "e.g. 38000" : "e.g. 37500000"}
+                  className={`${inputCls} text-lg font-extrabold`}
+                />
               </label>
-              {d.price && <p className="text-xs font-bold text-brand">{formatInr(Number(d.price))}{rent ? " per month" : ""}{!rent && d.superArea ? ` · ₹${Math.round(Number(d.price) / Number(d.superArea)).toLocaleString("en-IN")}/sq.ft` : ""}</p>}
+              {d.price && (
+                <p className="text-xs font-bold text-brand">
+                  {formatInr(Number(d.price))}
+                  {rent ? " per month" : ""}
+                  {!rent && d.superArea
+                    ? ` · ₹${Math.round(Number(d.price) / Number(d.superArea)).toLocaleString("en-IN")}/sq.ft`
+                    : ""}
+                </p>
+              )}
               {rent && (
-                <label><Label>Security deposit (₹)</Label><input inputMode="numeric" value={d.deposit} onChange={(e) => set("deposit", e.target.value.replace(/\D/g, ""))} className={inputCls} /></label>
+                <label>
+                  <Label>Security deposit (₹)</Label>
+                  <input
+                    inputMode="numeric"
+                    value={d.deposit}
+                    onChange={(e) =>
+                      set("deposit", e.target.value.replace(/\D/g, ""))
+                    }
+                    className={inputCls}
+                  />
+                </label>
               )}
               <label className="flex items-center gap-2.5 text-sm font-semibold">
-                <input type="checkbox" checked={d.negotiable} onChange={(e) => set("negotiable", e.target.checked)} className="h-5 w-5 accent-[#0b1426]" /> Price is negotiable
+                <input
+                  type="checkbox"
+                  checked={d.negotiable}
+                  onChange={(e) => set("negotiable", e.target.checked)}
+                  className="h-5 w-5 accent-[#0b1426]"
+                />{" "}
+                Price is negotiable
               </label>
             </Card>
 
             <Card className="space-y-3">
               <div className="flex items-center justify-between">
                 <h2 className="text-[14px] font-extrabold">Photos & video</h2>
-                <span className="text-[11px] font-bold text-mute">{images.length}/{MAX_PHOTOS} photos · min 2</span>
+                <span className="text-[11px] font-bold text-mute">
+                  {images.length}/{MAX_PHOTOS} photos · min 2
+                </span>
               </div>
               <div className="grid grid-cols-3 gap-2">
                 {images.map((m, i) => (
-                  <div key={m.url} className="relative aspect-square overflow-hidden rounded-xl bg-fill">
+                  <div
+                    key={m.url}
+                    className="relative aspect-square overflow-hidden rounded-xl bg-fill"
+                  >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={imgUrl(m.url, 300)} alt={`Photo ${i + 1}`} className="h-full w-full object-cover" />
-                    {i === 0 ? <span className="absolute left-1 top-1 rounded-full bg-navy px-2 py-0.5 text-[9px] font-bold text-white">COVER</span> : (
-                      <button type="button" onClick={() => makeCover(m.url)} className="absolute left-1 top-1 rounded-full bg-white/90 px-2 py-0.5 text-[9px] font-bold">Make cover</button>
+                    <img
+                      src={imgUrl(m.url, 300)}
+                      alt={`Photo ${i + 1}`}
+                      className="h-full w-full object-cover"
+                    />
+                    {i === 0 ? (
+                      <span className="absolute left-1 top-1 rounded-full bg-navy px-2 py-0.5 text-[9px] font-bold text-white">
+                        COVER
+                      </span>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => makeCover(m.url)}
+                        className="absolute left-1 top-1 rounded-full bg-white/90 px-2 py-0.5 text-[9px] font-bold"
+                      >
+                        Make cover
+                      </button>
                     )}
-                    <button type="button" onClick={() => removeMedia(m.url)} aria-label="Remove photo" className="absolute right-1 top-1 grid h-6 w-6 place-items-center rounded-full bg-white/90"><Icon name="x" className="h-3.5 w-3.5" /></button>
+                    <button
+                      type="button"
+                      onClick={() => removeMedia(m.url)}
+                      aria-label="Remove photo"
+                      className="absolute right-1 top-1 grid h-6 w-6 place-items-center rounded-full bg-white/90"
+                    >
+                      <Icon name="x" className="h-3.5 w-3.5" />
+                    </button>
                   </div>
                 ))}
-                {uploading > 0 && Array.from({ length: uploading }).map((_, i) => <div key={i} className="aspect-square animate-pulse rounded-xl bg-fill" />)}
+                {uploading > 0 &&
+                  Array.from({ length: uploading }).map((_, i) => (
+                    <div
+                      key={i}
+                      className="aspect-square animate-pulse rounded-xl bg-fill"
+                    />
+                  ))}
               </div>
-              <input ref={photoRef} type="file" accept="image/jpeg,image/png,image/webp" multiple hidden onChange={(e) => { upload(e.target.files, "IMAGE"); e.target.value = ""; }} />
-              <input ref={videoRef} type="file" accept="video/mp4,video/webm,video/quicktime" hidden onChange={(e) => { upload(e.target.files, "VIDEO"); e.target.value = ""; }} />
-              <button type="button" onClick={() => photoRef.current?.click()} className={btn("outline", "w-full")}><Icon name="camera" className="h-4 w-4" />Add photos</button>
+              <input
+                ref={photoRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                multiple
+                hidden
+                onChange={(e) => {
+                  upload(e.target.files, "IMAGE");
+                  e.target.value = "";
+                }}
+              />
+              <input
+                ref={videoRef}
+                type="file"
+                accept="video/mp4,video/webm,video/quicktime"
+                hidden
+                onChange={(e) => {
+                  upload(e.target.files, "VIDEO");
+                  e.target.value = "";
+                }}
+              />
+              <button
+                type="button"
+                onClick={() => photoRef.current?.click()}
+                className={btn("outline", "w-full")}
+              >
+                <Icon name="camera" className="h-4 w-4" />
+                Add photos
+              </button>
               {video ? (
                 <div className="space-y-2">
-                  <video src={video.url} controls playsInline preload="metadata" className="aspect-video w-full rounded-xl bg-black" />
-                  <button type="button" onClick={() => removeMedia(video.url)} className="text-xs font-bold text-red-600">Remove video</button>
+                  <video
+                    src={video.url}
+                    controls
+                    playsInline
+                    preload="metadata"
+                    className="aspect-video w-full rounded-xl bg-black"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => removeMedia(video.url)}
+                    className="text-xs font-bold text-red-600"
+                  >
+                    Remove video
+                  </button>
                 </div>
               ) : (
-                <button type="button" onClick={() => videoRef.current?.click()} className={btn("outline", "w-full")}><Icon name="play" className="h-4 w-4" />Add video (optional, max 80 MB)</button>
+                <button
+                  type="button"
+                  onClick={() => videoRef.current?.click()}
+                  className={btn("outline", "w-full")}
+                >
+                  <Icon name="play" className="h-4 w-4" />
+                  Add video (optional, max 80 MB)
+                </button>
               )}
             </Card>
 
             <Card className="space-y-2">
-              <h2 className="text-[14px] font-extrabold">Contact shown to buyers</h2>
-              <p className="text-xs text-mute">Buyers reach you through the Brickbaaz owner desk: WhatsApp, call and visit requests. Your inquiries arrive in this app.</p>
+              <h2 className="text-[14px] font-extrabold">
+                Contact shown to buyers
+              </h2>
+              <p className="text-xs text-mute">
+                Buyers reach you through the Brickbaaz owner desk: WhatsApp,
+                call and visit requests. Your inquiries arrive in this app.
+              </p>
             </Card>
             <label className="flex items-start gap-2.5 text-[13px] font-semibold">
-              <input type="checkbox" checked={d.confirmed} onChange={(e) => set("confirmed", e.target.checked)} className="mt-0.5 h-5 w-5 shrink-0 accent-[#0b1426]" />
+              <input
+                type="checkbox"
+                checked={d.confirmed}
+                onChange={(e) => set("confirmed", e.target.checked)}
+                className="mt-0.5 h-5 w-5 shrink-0 accent-[#0b1426]"
+              />
               I confirm these details are correct.
             </label>
           </>
         )}
 
-        {err && <p role="alert" className="rounded-xl bg-red-50 px-3.5 py-2.5 text-xs font-bold text-red-700">{err}</p>}
-        {notice && <p role="status" className="rounded-xl bg-green-50 px-3.5 py-2.5 text-xs font-bold text-ok">{notice}</p>}
+        {err && (
+          <p
+            role="alert"
+            className="rounded-xl bg-red-50 px-3.5 py-2.5 text-xs font-bold text-red-700"
+          >
+            {err}
+          </p>
+        )}
+        {notice && (
+          <p
+            role="status"
+            className="rounded-xl bg-green-50 px-3.5 py-2.5 text-xs font-bold text-ok"
+          >
+            {notice}
+          </p>
+        )}
       </div>
 
-      <div className="sticky bottom-0 z-30 space-y-2 border-t border-line bg-white px-4 pt-3" style={{ paddingBottom: "max(12px, env(safe-area-inset-bottom))" }}>
+      <div
+        className="sticky bottom-0 z-30 space-y-2 border-t border-line bg-white px-4 pt-3"
+        style={{ paddingBottom: "max(12px, env(safe-area-inset-bottom))" }}
+      >
         <div className="flex gap-2">
-          {step > 1 && <button type="button" onClick={() => setStep(step - 1)} className={btn("soft", "flex-1")}>← Back</button>}
+          {step > 1 && (
+            <button
+              type="button"
+              onClick={() => setStep(step - 1)}
+              className={btn("soft", "flex-1")}
+            >
+              ← Back
+            </button>
+          )}
           {step < 3 ? (
-            <button type="button" onClick={next} className={btn("primary", "flex-[2]")}>Continue to {STEPS[step][0].toLowerCase()} →</button>
+            <button
+              type="button"
+              onClick={next}
+              className={btn("primary", "flex-[2]")}
+            >
+              Continue to {STEPS[step][0].toLowerCase()} →
+            </button>
           ) : (
-            <button type="button" disabled={pending || uploading > 0} onClick={() => submit(true)} className={btn("brand", "flex-[2]")}>
-              {pending ? "Publishing…" : uploading ? "Uploading…" : id && initial?.status === "ACTIVE" ? "Save changes" : "🚀 Publish listing"}
+            <button
+              type="button"
+              disabled={pending || uploading > 0}
+              onClick={() => submit(true)}
+              className={btn("brand", "flex-[2]")}
+            >
+              {pending
+                ? "Publishing…"
+                : uploading
+                  ? "Uploading…"
+                  : id && initial?.status === "ACTIVE"
+                    ? "Save changes"
+                    : "🚀 Publish listing"}
             </button>
           )}
         </div>
-        <button type="button" disabled={pending} onClick={() => submit(false)} className="w-full text-center text-xs font-bold text-mute">
-          Save as draft
-        </button>
+        {!inviteToken && (
+          <button
+            type="button"
+            disabled={pending}
+            onClick={() => submit(false)}
+            className="w-full text-center text-xs font-bold text-mute"
+          >
+            Save as draft
+          </button>
+        )}
       </div>
 
-      <Sheet open={pinOpen} onClose={() => setPinOpen(false)} title="Set exact location" footer={
-        <div className="flex gap-2">
-          <button type="button" onClick={useMyLocation} className={btn("soft", "flex-1")}>Use my location</button>
-          <button type="button" onClick={() => setPinOpen(false)} className={btn("primary", "flex-1")}>Done</button>
-        </div>
-      }>
-        <p className="mb-2 text-xs text-mute">Tap the map to drop the pin on your building.</p>
+      <Sheet
+        open={pinOpen}
+        onClose={() => setPinOpen(false)}
+        title="Set exact location"
+        footer={
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={useMyLocation}
+              className={btn("soft", "flex-1")}
+            >
+              Use my location
+            </button>
+            <button
+              type="button"
+              onClick={() => setPinOpen(false)}
+              className={btn("primary", "flex-1")}
+            >
+              Done
+            </button>
+          </div>
+        }
+      >
+        <p className="mb-2 text-xs text-mute">
+          Tap the map to drop the pin on your building.
+        </p>
         <div className="h-72 overflow-hidden rounded-2xl border border-line">
           <MiniMap
             center={center}
-            pin={d.lat !== "" && d.lat != null ? { lat: Number(d.lat), lng: Number(d.lng) } : null}
+            pin={
+              d.lat !== "" && d.lat != null
+                ? { lat: Number(d.lat), lng: Number(d.lng) }
+                : null
+            }
             onPick={(p) => setD((x) => ({ ...x, lat: p.lat, lng: p.lng }))}
             zoom={d.lat !== "" ? 16 : knownCenter ? 12 : 5}
           />

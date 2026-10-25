@@ -1,3 +1,4 @@
+import InventoryRefresh from "@/components/InventoryRefresh";
 import Link from "next/link";
 import OwnerTopBar from "@/components/OwnerTopBar";
 import TabBar from "@/components/TabBar";
@@ -8,12 +9,19 @@ export default async function OwnerTabsLayout({ children }) {
   await requireOwner();
   return (
     <div className="shell owner-shell">
+      <InventoryRefresh />
       <OwnerSidebar />
       <OwnerTopBar />
       <nav
         aria-label="Inventory and CRM"
         className="owner-mobile-nav flex gap-2 overflow-x-auto border-b border-line bg-white px-4 py-2 text-xs font-bold"
       >
+        <Link
+          href="/owner/posting-links"
+          className="shrink-0 rounded-full bg-fill px-3 py-2"
+        >
+          Posting links
+        </Link>
         <Link href="/owner/listings" className="rounded-full bg-fill px-3 py-2">
           Properties
         </Link>
