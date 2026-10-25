@@ -4,13 +4,19 @@ import { useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Card, Icon, Pill, btn, cx } from "@/components/ui";
-import { setStatus, setFeatured, deleteProperty } from "@/app/actions/owner";
+import {
+  approveProperty,
+  setStatus,
+  setFeatured,
+  deleteProperty,
+} from "@/app/actions/owner";
 import { formatPrice, STATUS_LABEL, perSqft } from "@/lib/format";
 import { Cover } from "@/components/PropertyCard";
 
 const TONE = {
   ACTIVE: "ok",
   DRAFT: "brand",
+  PENDING: "brand",
   PAUSED: "soft",
   RENTED: "dark",
   SOLD: "dark",
@@ -194,7 +200,17 @@ export default function OwnerPropertyCard({ p, inquiries }) {
           <Icon name="edit" className="h-4 w-4" />
           {p.status === "DRAFT" ? "Continue" : "Edit"}
         </Link>
-        {p.status === "ACTIVE" ? (
+        {p.status === "PENDING" && p.submission ? (
+          <button
+            type="button"
+            disabled={pending}
+            onClick={() => run(() => approveProperty(p.id))}
+            className={btn("brand", "flex-1")}
+          >
+            <Icon name="check" className="h-4 w-4" />
+            {pending ? "Approving…" : "Approve"}
+          </button>
+        ) : p.status === "ACTIVE" ? (
           <button
             type="button"
             disabled={pending}
@@ -204,9 +220,9 @@ export default function OwnerPropertyCard({ p, inquiries }) {
             <Icon name="check" className="h-4 w-4" />
             Mark {done.toLowerCase()}
           </button>
-        ) : p.status === "DRAFT" ? (
+        ) : p.status === "DRAFT" || p.status === "PENDING" ? (
           <span className={btn("soft", "flex-1 cursor-default")}>
-            Not published
+            {p.status === "PENDING" ? "Awaiting approval" : "Not published"}
           </span>
         ) : (
           <Link href={`/property/${p.id}`} className={btn("soft", "flex-1")}>

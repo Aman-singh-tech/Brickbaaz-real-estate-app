@@ -8,6 +8,7 @@ export const metadata = { title: "Listings" };
 
 const FILTERS = [
   ["all", "All"],
+  ["PENDING", "Pending approval"],
   ["ACTIVE", "Active"],
   ["DRAFT", "Drafts"],
   ["PAUSED", "Paused"],

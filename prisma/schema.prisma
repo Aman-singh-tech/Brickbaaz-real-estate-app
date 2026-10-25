@@ -36,6 +36,7 @@ enum PropertyType {
 
 enum PropertyStatus {
   DRAFT
+  PENDING
   ACTIVE
   PAUSED
   RENTED

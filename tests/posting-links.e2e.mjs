@@ -141,7 +141,7 @@ try {
     await form.getByLabel("I confirm these details are correct.").check();
     await form.getByRole("button", { name: /Publish listing/ }).click();
     await expect(
-      form.getByRole("heading", { name: "Your property is published" }),
+      form.getByRole("heading", { name: "Property submitted for approval" }),
     ).toBeVisible({ timeout: 20000 });
   }
   await submit("Invited Home One");
@@ -149,17 +149,18 @@ try {
     where: { title: "Invited Home One" },
     include: { submission: true, media: true },
   });
-  assert.equal(property.status, "ACTIVE");
+  assert.equal(property.status, "PENDING");
   assert.equal(property.ownerId, owner.id);
   assert.equal(property.submission.phone, privatePhone);
   assert.equal(property.media.length, 3);
   await expect(
     customer.getByText("Invited Home One", { exact: true }).first(),
-  ).toBeVisible({ timeout: 20000 });
+  ).toHaveCount(0);
   await page.goto(url + "/owner/listings");
   await expect(
     page.getByText(`Submitted by ${privateName}`, { exact: true }),
   ).toBeVisible();
+  await expect(page.getByRole("button", { name: "Approve" })).toBeVisible();
   for (const path of ["/", "/search", `/property/${property.id}`]) {
     const html = await (await guest.request.get(url + path)).text();
     assert.ok(
@@ -193,6 +194,22 @@ try {
   await expect
     .poll(() => db.media.count({ where: { propertyId: property.id } }))
     .toBe(4);
+  assert.equal(
+    (await db.property.findUnique({ where: { id: property.id } })).status,
+    "PENDING",
+    "Editing a submitted property must not approve it",
+  );
+  await page.goto(url + "/owner/listings?f=PENDING");
+  await page.getByRole("button", { name: "Approve" }).click();
+  await expect(page.getByText("ACTIVE", { exact: true })).toBeVisible();
+  assert.equal(
+    (await db.property.findUnique({ where: { id: property.id } })).status,
+    "ACTIVE",
+  );
+  await customer.reload();
+  await expect(
+    customer.getByText("Invited Home One", { exact: true }).first(),
+  ).toBeVisible({ timeout: 20000 });
   assert.equal(
     await form.getByRole("button", { name: "Post another property" }).count(),
     0,
@@ -240,7 +257,7 @@ try {
     403,
   );
   console.log(
-    "PASS: owner-created single-use link, anonymous full-form publishing once, consumed-link rejection, camera capture and media persistence, customer auto refresh, private submitter details, notifications and revocation.",
+    "PASS: owner-created single-use link, anonymous approval-pending submission, explicit owner approval, consumed-link rejection, camera capture and media persistence, customer visibility after approval, private submitter details, notifications and revocation.",
   );
 } finally {
   await browser?.close();

@@ -40,6 +40,24 @@ export async function setStatus(id, status) {
   return { ok: true };
 }
 
+export async function approveProperty(id) {
+  const p = await own(id);
+  if (!p || p.status !== "PENDING") return { error: "Pending listing not found" };
+  const submission = await prisma.propertySubmission.findUnique({
+    where: { propertyId: id },
+    select: { propertyId: true },
+  });
+  if (!submission) return { error: "Only submitted properties need approval" };
+  await prisma.property.update({
+    where: { id },
+    data: { status: "ACTIVE", publishedAt: p.publishedAt ?? new Date() },
+  });
+  refresh(id);
+  revalidatePath("/owner/listings");
+  revalidatePath("/owner/dashboard");
+  return { ok: true };
+}
+
 export async function setFeatured(id, featured) {
   if (!(await own(id))) return { error: "Not found" };
   await prisma.property.update({

@@ -1,0 +1,1 @@
+ALTER TYPE "PropertyStatus" ADD VALUE 'PENDING';

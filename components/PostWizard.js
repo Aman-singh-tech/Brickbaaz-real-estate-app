@@ -349,15 +349,12 @@ export default function PostWizard({ initial, id: initialId, inviteToken }) {
   if (submitted)
     return (
       <Card className="m-5 space-y-5">
-        <h1 className="text-2xl font-bold">Your property is published</h1>
+        <h1 className="text-2xl font-bold">Property submitted for approval</h1>
         <p>
           Brickbaaz has received your property and contact details. Your listing
-          is available to customers through matching location and search
-          filters.
+          will become visible to customers after the property owner reviews and
+          approves it.
         </p>
-        <Link href={`/property/${submitted}`} className={btn("primary")}>
-          View property
-        </Link>
         <p className="text-sm text-mute">
           This link has now been used. Ask Brickbaaz for a new link to submit
           another property.
@@ -380,8 +377,10 @@ export default function PostWizard({ initial, id: initialId, inviteToken }) {
             {id ? "Update your listing" : "List property for free"}
           </h1>
           <p className="text-sm text-mute">
-            Fill the basics, set the price and add photos. Your listing goes
-            live for buyers immediately.
+            Fill the basics, set the price and add photos.
+            {inviteToken
+              ? " The property owner will review it before it goes live."
+              : " Your listing goes live for buyers immediately."}
           </p>
         </div>
 
