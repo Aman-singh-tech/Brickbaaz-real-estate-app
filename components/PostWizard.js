@@ -114,7 +114,10 @@ export default function PostWizard({ initial, id: initialId, inviteToken }) {
   const [pinOpen, setPinOpen] = useState(false);
   const [uploading, setUploading] = useState(0);
   const [pending, start] = useTransition();
-  const [q, setQ] = useState("");
+  const [q, setQ] = useState(() =>
+    [initial?.locality, initial?.city, initial?.state].filter(Boolean).join(", "),
+  );
+  const [locationQuery, setLocationQuery] = useState("");
   const [hits, setHits] = useState([]);
   const [searching, setSearching] = useState(false);
   const photoRef = useRef(null);
@@ -131,7 +134,7 @@ export default function PostWizard({ initial, id: initialId, inviteToken }) {
 
   // Location search (OpenStreetMap Nominatim): fills city, state, locality and the map pin.
   useEffect(() => {
-    const text = q.trim();
+    const text = locationQuery.trim();
     if (text.length < 3) return;
     const ctl = new AbortController();
     const t = setTimeout(async () => {
@@ -141,18 +144,19 @@ export default function PostWizard({ initial, id: initialId, inviteToken }) {
           `https://nominatim.openstreetmap.org/search?format=jsonv2&addressdetails=1&limit=6&countrycodes=in&q=${encodeURIComponent(text)}`,
           { signal: ctl.signal, headers: { "Accept-Language": "en" } },
         );
-        setHits(res.ok ? await res.json() : []);
+        const results = res.ok ? await res.json() : [];
+        if (!ctl.signal.aborted) setHits(results);
       } catch {
         /* aborted or offline */
       } finally {
-        setSearching(false);
+        if (!ctl.signal.aborted) setSearching(false);
       }
     }, 450);
     return () => {
       clearTimeout(t);
       ctl.abort();
     };
-  }, [q]);
+  }, [locationQuery]);
 
   function pickPlace(h) {
     const a = h.address ?? {};
@@ -174,7 +178,9 @@ export default function PostWizard({ initial, id: initialId, inviteToken }) {
       lat: Number(h.lat),
       lng: Number(h.lon),
     }));
-    setQ("");
+    setQ(h.display_name || [locality, city, a.state].filter(Boolean).join(", "));
+    setLocationQuery("");
+    setSearching(false);
     setHits([]);
   }
 
@@ -352,6 +358,10 @@ export default function PostWizard({ initial, id: initialId, inviteToken }) {
           onClick={() => {
             setSubmitted(null);
             setD({ ...EMPTY });
+            setQ("");
+            setLocationQuery("");
+            setHits([]);
+            setSearching(false);
             setStep(1);
           }}
         >
@@ -492,10 +502,13 @@ export default function PostWizard({ initial, id: initialId, inviteToken }) {
               <div className="relative">
                 <Label>Search location (area, sector, society or city)</Label>
                 <input
+                  aria-label="Search location (area, sector, society or city)"
                   value={q}
                   onChange={(e) => {
                     setQ(e.target.value);
-                    if (e.target.value.trim().length < 3) setHits([]);
+                    setLocationQuery(e.target.value);
+                    setSearching(false);
+                    setHits([]);
                   }}
                   placeholder="e.g. Sector 56 Gurugram"
                   autoComplete="off"
