@@ -12,7 +12,7 @@ export default async function InvitedPost({ params }) {
     return (
       <main className="mx-auto max-w-xl p-10">
         <h1 className="text-2xl font-bold">Posting link unavailable</h1>
-        <p className="mt-4">Please ask Brickbaaz for a new posting link.</p>
+        <p className="mt-4">This link has already been used or disabled. Please ask Brickbaaz for a new posting link.</p>
       </main>
     );
   return (

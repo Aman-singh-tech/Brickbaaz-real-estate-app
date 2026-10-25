@@ -1,6 +1,7 @@
 "use server";
 import { randomBytes } from "node:crypto";
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { requireOwner } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { postingLink } from "@/lib/posting-links";
@@ -28,7 +29,8 @@ export async function submitInvitedProperty(token, data, contact) {
   const link = await postingLink(token);
   if (!link)
     return {
-      error: "This posting link is unavailable. Please contact Brickbaaz.",
+      error:
+        "This posting link has already been used or disabled. Please ask Brickbaaz for a new link.",
     };
   const name = String(contact?.name || "")
     .trim()
@@ -46,8 +48,9 @@ export async function submitInvitedProperty(token, data, contact) {
       error: "Enter your name, valid phone number and email (if provided).",
       step: 1,
     };
+  let result;
   try {
-    return await persistProperty({ id: link.ownerId }, null, data, true, {
+    result = await persistProperty({ id: link.ownerId }, null, data, true, {
       linkId: link.id,
       name,
       phone,
@@ -56,7 +59,9 @@ export async function submitInvitedProperty(token, data, contact) {
   } catch {
     return {
       error:
-        "Unable to submit. Check that your link is still active and try again.",
+        "Unable to submit. This link may already be used or disabled. Please contact Brickbaaz.",
     };
   }
+  if (result.ok) redirect(`/post-property/submitted?id=${result.id}`);
+  return result;
 }

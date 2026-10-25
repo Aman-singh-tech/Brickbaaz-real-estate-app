@@ -115,7 +115,9 @@ export default function PostWizard({ initial, id: initialId, inviteToken }) {
   const [uploading, setUploading] = useState(0);
   const [pending, start] = useTransition();
   const [q, setQ] = useState(() =>
-    [initial?.locality, initial?.city, initial?.state].filter(Boolean).join(", "),
+    [initial?.locality, initial?.city, initial?.state]
+      .filter(Boolean)
+      .join(", "),
   );
   const [locationQuery, setLocationQuery] = useState("");
   const [hits, setHits] = useState([]);
@@ -178,7 +180,9 @@ export default function PostWizard({ initial, id: initialId, inviteToken }) {
       lat: Number(h.lat),
       lng: Number(h.lon),
     }));
-    setQ(h.display_name || [locality, city, a.state].filter(Boolean).join(", "));
+    setQ(
+      h.display_name || [locality, city, a.state].filter(Boolean).join(", "),
+    );
     setLocationQuery("");
     setSearching(false);
     setHits([]);
@@ -353,20 +357,10 @@ export default function PostWizard({ initial, id: initialId, inviteToken }) {
         <Link href={`/property/${submitted}`} className={btn("primary")}>
           View property
         </Link>
-        <button
-          className={btn("brand")}
-          onClick={() => {
-            setSubmitted(null);
-            setD({ ...EMPTY });
-            setQ("");
-            setLocationQuery("");
-            setHits([]);
-            setSearching(false);
-            setStep(1);
-          }}
-        >
-          Post another property
-        </button>
+        <p className="text-sm text-mute">
+          This link has now been used. Ask Brickbaaz for a new link to submit
+          another property.
+        </p>
       </Card>
     );
   return (

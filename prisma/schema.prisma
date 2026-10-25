@@ -375,6 +375,7 @@ model PostingLink {
  ownerId Int
  owner User @relation(fields: [ownerId], references: [id], onDelete: Cascade)
  active Boolean @default(true)
+ usedAt DateTime?
  createdAt DateTime @default(now())
  submissions PropertySubmission[]
 }

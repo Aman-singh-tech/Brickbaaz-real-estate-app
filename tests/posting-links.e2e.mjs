@@ -80,6 +80,14 @@ try {
       json: { url: `/api/media/invite-${++uploads}.png`, kind: "IMAGE" },
     }),
   );
+  let submissionRequest;
+  form.on("request", (request) => {
+    if (request.method() === "POST" && request.headers()["next-action"])
+      submissionRequest = {
+        body: request.postData(),
+        headers: request.headers(),
+      };
+  });
   await form.goto(inviteUrl);
   await expect(form.locator('meta[name="robots"]')).toHaveAttribute(
     "content",
@@ -143,16 +151,39 @@ try {
       "Private data leak " + path,
     );
   }
-  await form.getByRole("button", { name: "Post another property" }).click();
-  await submit("Invited Home Two");
-  assert.equal(await db.propertySubmission.count(), 2);
+  assert.equal(
+    await form.getByRole("button", { name: "Post another property" }).count(),
+    0,
+  );
+  assert.equal(await db.propertySubmission.count(), 1);
   assert.equal(
     await db.notification.count({
       where: { userId: owner.id, title: "Property submitted" },
     }),
-    2,
+    1,
   );
+  const used = await db.postingLink.findFirst({
+    where: { token: inviteUrl.split("/").pop() },
+  });
+  assert.ok(used.usedAt);
+  assert.ok(submissionRequest, "Captured property action");
+  await guest.request.post(inviteUrl, {
+    headers: submissionRequest.headers,
+    data: submissionRequest.body,
+  });
+  assert.equal(
+    await db.propertySubmission.count(),
+    1,
+    "Replayed submission must not create another property",
+  );
+  assert.equal(await db.property.count(), 1);
+
   await page.goto(url + "/owner/posting-links");
+  await expect(page.getByText(/Used · Submission complete/)).toBeVisible();
+  assert.equal(await page.getByLabel("Posting link").count(), 0);
+  await page.getByLabel("Link label").fill("Unused invite");
+  await page.getByRole("button", { name: "Create posting link" }).click();
+  await expect(page.getByLabel("Posting link")).toHaveCount(1);
   await page.getByRole("button", { name: "Disable link" }).click();
   await expect(page.getByText(/Disabled/)).toBeVisible();
   await form.goto(inviteUrl);
@@ -167,7 +198,7 @@ try {
     403,
   );
   console.log(
-    "PASS: owner-created reusable link, anonymous full-form publishing twice, media persistence, customer auto refresh, private submitter details, notifications and revocation.",
+    "PASS: owner-created single-use link, anonymous full-form publishing once, consumed-link rejection, media persistence, customer auto refresh, private submitter details, notifications and revocation.",
   );
 } finally {
   await browser?.close();

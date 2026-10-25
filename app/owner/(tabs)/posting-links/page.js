@@ -23,9 +23,9 @@ export default async function PostingLinks() {
     <div className="space-y-5 p-5">
       <h1 className="text-2xl font-bold">Property posting links</h1>
       <p>
-        Share the full property form. Each active link accepts multiple
-        submissions without expiry. Properties publish directly; submitter
-        contacts stay private.
+        Share the full property form. Each link accepts one successful property
+        submission. Properties publish directly; submitter contacts stay
+        private.
       </p>
       <Card>
         <form action={createPostingLink} className="space-y-3">
@@ -45,10 +45,14 @@ export default async function PostingLinks() {
         <Card key={link.id} className="space-y-4">
           <h2 className="font-bold">{link.label}</h2>
           <p className="text-sm">
-            {link.active ? "Active · Unlimited submissions" : "Disabled"} ·{" "}
-            {link._count.submissions} submitted
+            {link.usedAt
+              ? "Used · Submission complete"
+              : link.active
+                ? "Active · One submission"
+                : "Disabled"}{" "}
+            · {link._count.submissions} submitted
           </p>
-          {link.active && (
+          {link.active && !link.usedAt && (
             <>
               <PostingLinkShare url={`${base}/post-property/${link.token}`} />
               <form action={disablePostingLink}>
