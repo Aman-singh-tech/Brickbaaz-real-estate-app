@@ -212,6 +212,75 @@ export default async function Explore({ searchParams }) {
         </div>
       </Card>
 
+
+
+      <section data-reveal className="home-section space-y-5">
+        <SectionTitle action="View all →" href={`/search?p=${purpose}`}>
+          Explore by property type
+        </SectionTitle>
+        <div className="category-grid grid grid-cols-2 gap-3">
+          {CATS.map(([type, icon]) => (
+            <Link
+              key={type}
+              href={`/search?p=${purpose}&type=${type}`}
+              className="home-service-card rounded-2xl border border-line bg-white p-5 text-center"
+            >
+              <span className="mx-auto mb-3 grid h-10 w-10 place-items-center rounded-xl bg-brand-soft text-brand">
+                <Icon name={icon} />
+              </span>
+              <p className="text-sm font-bold">
+                {TYPE_LABEL[type].split(" / ")[0]}
+              </p>
+              <p className="mt-1 text-xs text-mute">
+                {counts[type] ?? 0} listings
+              </p>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      <section id="properties" data-reveal className="home-section space-y-6">
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <Heading
+            eyebrow="DISCOVER YOUR NEXT HOME"
+            title="Featured properties"
+          >
+            Explore {purpose === "rent" ? "rental homes" : "homes for sale"} in{" "}
+            {city}, with photos, prices and the details that matter.
+          </Heading>
+          <span className="rounded-full bg-brand-soft px-4 py-2 text-xs font-bold text-brand">
+            {total} active {purpose === "rent" ? "rental" : "sale"} listings
+          </span>
+        </div>
+        {items.length ? (
+          <div className="home-scroll-grid property-grid">
+            {items.map((p) => (
+              <PropertyCard key={p.id} property={p} saved={saved.has(p.id)} />
+            ))}
+          </div>
+        ) : (
+          <Card className="!p-8 text-center text-sm text-mute">
+            No {purpose === "rent" ? "rental" : "sale"} listings are available
+            in {city} right now.{" "}
+            <a href="#contact" className="font-bold text-brand">
+              Tell us what you are looking for.
+            </a>
+          </Card>
+        )}
+        <Link href={`/search?p=${purpose}`} className={btn("soft")}>
+          See all properties <span aria-hidden="true">→</span>
+        </Link>
+      </section>
+
+      <section id="home-loan-emi" data-reveal className="home-section space-y-6" aria-labelledby="home-loan-title">
+        <div className="space-y-3">
+          <p className="home-eyebrow">PLAN YOUR HOME LOAN</p>
+          <h2 id="home-loan-title" className="home-heading">Home Loan EMI Calculator</h2>
+          <p className="text-sm leading-7 text-mute">Estimate your monthly repayments using your loan amount, interest rate and tenure.</p>
+        </div>
+        <HomeLoanCalculator />
+      </section>
+
       <section
         id="about"
         data-reveal
@@ -288,73 +357,6 @@ export default async function Explore({ searchParams }) {
             </div>
           </div>
         </div>
-      </section>
-
-      <section data-reveal className="home-section space-y-5">
-        <SectionTitle action="View all →" href={`/search?p=${purpose}`}>
-          Explore by property type
-        </SectionTitle>
-        <div className="category-grid grid grid-cols-2 gap-3">
-          {CATS.map(([type, icon]) => (
-            <Link
-              key={type}
-              href={`/search?p=${purpose}&type=${type}`}
-              className="home-service-card rounded-2xl border border-line bg-white p-5 text-center"
-            >
-              <span className="mx-auto mb-3 grid h-10 w-10 place-items-center rounded-xl bg-brand-soft text-brand">
-                <Icon name={icon} />
-              </span>
-              <p className="text-sm font-bold">
-                {TYPE_LABEL[type].split(" / ")[0]}
-              </p>
-              <p className="mt-1 text-xs text-mute">
-                {counts[type] ?? 0} listings
-              </p>
-            </Link>
-          ))}
-        </div>
-      </section>
-
-      <section id="properties" data-reveal className="home-section space-y-6">
-        <div className="flex flex-wrap items-end justify-between gap-4">
-          <Heading
-            eyebrow="DISCOVER YOUR NEXT HOME"
-            title="Featured properties"
-          >
-            Explore {purpose === "rent" ? "rental homes" : "homes for sale"} in{" "}
-            {city}, with photos, prices and the details that matter.
-          </Heading>
-          <span className="rounded-full bg-brand-soft px-4 py-2 text-xs font-bold text-brand">
-            {total} active {purpose === "rent" ? "rental" : "sale"} listings
-          </span>
-        </div>
-        {items.length ? (
-          <div className="home-scroll-grid property-grid">
-            {items.map((p) => (
-              <PropertyCard key={p.id} property={p} saved={saved.has(p.id)} />
-            ))}
-          </div>
-        ) : (
-          <Card className="!p-8 text-center text-sm text-mute">
-            No {purpose === "rent" ? "rental" : "sale"} listings are available
-            in {city} right now.{" "}
-            <a href="#contact" className="font-bold text-brand">
-              Tell us what you are looking for.
-            </a>
-          </Card>
-        )}
-        <Link href={`/search?p=${purpose}`} className={btn("soft")}>
-          See all properties <span aria-hidden="true">→</span>
-        </Link>
-      </section>
-
-      <section id="home-loan-emi" data-reveal className="home-section space-y-6" aria-labelledby="home-loan-title">
-        <div className="space-y-3">
-          <p className="home-eyebrow">PLAN YOUR HOME LOAN</p>
-          <h2 id="home-loan-title" className="home-heading">Home Loan EMI Calculator</h2>
-          <p className="text-sm leading-7 text-mute">Estimate your monthly repayments using your loan amount, interest rate and tenure.</p>
-        </div>
-        <HomeLoanCalculator />
       </section>
 
       <section id="projects" data-reveal className="home-section space-y-6">
