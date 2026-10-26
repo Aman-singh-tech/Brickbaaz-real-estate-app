@@ -1119,7 +1119,7 @@ export default function PostWizard({ initial, id: initialId, inviteToken }) {
                 ? "Publishing…"
                 : uploading
                   ? "Uploading…"
-                  : id && initial?.status === "ACTIVE"
+                  : id && ["ACTIVE", "PENDING"].includes(initial?.status)
                     ? "Save changes"
                     : "🚀 Publish listing"}
             </button>

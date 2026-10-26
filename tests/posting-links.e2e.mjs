@@ -153,6 +153,17 @@ try {
   assert.equal(property.ownerId, owner.id);
   assert.equal(property.submission.phone, privatePhone);
   assert.equal(property.media.length, 3);
+  await page.goto(url + "/owner/dashboard");
+  await expect(
+    page.getByRole("button", { name: "Approve", exact: true }),
+  ).toBeVisible();
+  await page
+    .getByRole("link", { name: "Invited Home One", exact: true })
+    .click();
+  await expect(page).toHaveURL(url + "/owner/post?edit=" + property.id);
+  await expect(page.getByLabel("Property title")).toHaveValue(
+    "Invited Home One",
+  );
   await expect(
     customer.getByText("Invited Home One", { exact: true }).first(),
   ).toHaveCount(0);
@@ -201,7 +212,7 @@ try {
   );
   await page.goto(url + "/owner/listings?f=PENDING");
   await page.getByRole("button", { name: "Approve" }).click();
-  await expect(page.getByText("ACTIVE", { exact: true })).toBeVisible();
+  await expect(page.getByText("Nothing here.", { exact: true })).toBeVisible();
   assert.equal(
     (await db.property.findUnique({ where: { id: property.id } })).status,
     "ACTIVE",

@@ -130,7 +130,11 @@ export default function OwnerPropertyCard({ p, inquiries }) {
 
       <div>
         <Link
-          href={`/property/${p.id}`}
+          href={
+            p.status === "PENDING" || p.status === "DRAFT"
+              ? `/owner/post?edit=${p.id}`
+              : `/property/${p.id}`
+          }
           className="block text-[15px] font-extrabold leading-snug"
         >
           {p.title}

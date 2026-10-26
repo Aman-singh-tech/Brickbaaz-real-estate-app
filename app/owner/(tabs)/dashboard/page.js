@@ -16,6 +16,7 @@ export default async function Dashboard() {
       orderBy: { updatedAt: "desc" },
       take: 4,
       include: {
+        submission: { include: { link: { select: { label: true } } } },
         media: { where: { kind: "IMAGE" }, orderBy: { sort: "asc" }, take: 1 },
       },
     }),
