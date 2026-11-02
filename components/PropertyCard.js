@@ -50,7 +50,7 @@ function badgeFor(p) {
           : "UNDER CONSTRUCTION"}
       </Pill>
     );
-  return <Pill tone="ok">ZERO BROKERAGE</Pill>;
+  return null;
 }
 
 export default function PropertyCard({
