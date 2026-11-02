@@ -1,4 +1,4 @@
-# Render Blueprint: one web service + one Postgres, same region.
+# Render Blueprint: web service on Render, external PostgreSQL on Neon.
 # Dashboard > New > Blueprint > pick this repo. Fill the variables marked "sync: false" when asked.
 services:
   - type: web
@@ -14,9 +14,7 @@ services:
       - key: NODE_VERSION
         value: "22"
       - key: DATABASE_URL
-        fromDatabase:
-          name: brickbaaz-db
-          property: connectionString
+        sync: false # Neon PostgreSQL URL with sslmode=require; configured in Render Environment.
       - key: OWNER_HOST
         sync: false # owner app hostname, e.g. owner.brickbaaz.com (leave empty to serve everything on one host)
       - key: SESSION_SECRET
@@ -48,7 +46,5 @@ services:
       - key: GOOGLE_CLIENT_SECRET
         sync: false
 
-databases:
-  - name: brickbaaz-db
-    region: singapore
-    plan: free # expires after a while; upgrade before real data
+# The former Render database is intentionally no longer provisioned by this Blueprint.
+# Removing its definition does not delete the existing database or its recovery export.
